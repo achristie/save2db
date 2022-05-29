@@ -1,8 +1,7 @@
-package main
+package plattsapi
 
 import (
 	"encoding/json"
-	"flag"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -47,17 +46,4 @@ func GetToken(Username string, Password string, APIKey string) Token {
 		log.Fatal(err)
 	}
 	return token
-}
-
-func main() {
-	APIKey := flag.String("apikey", "NULL", "API Key to call API with")
-	Username := flag.String("username", "NULL", "Username to get a token")
-	Password := flag.String("password", "NULL", "Password associated with Username")
-
-	flag.Parse()
-
-	t := GetToken(*Username, *Password, *APIKey)
-
-	log.Print(t.AccessToken)
-	log.Println(t.RefreshToken)
 }
