@@ -1,6 +1,6 @@
 package plattsapi
 
-type CurrentSymbol struct {
+type SymbolHistory struct {
 	Metadata struct {
 		Count      int    `json:"count"`
 		PageSize   int    `json:"pageSize"`
@@ -12,16 +12,10 @@ type CurrentSymbol struct {
 		Symbol string `json:"symbol"`
 		Data   []struct {
 			Bate        string  `json:"bate"`
+			Value       float32 `json:"value"`
 			AssessDate  string  `json:"assessDate"`
-			Value       float64 `json:"value"`
 			IsCorrected string  `json:"isCorrected"`
 			ModDate     string  `json:"modDate"`
-			Change      struct {
-				PValue       float64 `json:"pValue"`
-				PDate        string  `json:"pDate"`
-				DeltaPrice   float64 `json:"deltaPrice"`
-				DeltaPercent float64 `json:"deltaPercent"`
-			} `json:"change"`
 		} `json:"data"`
 	} `json:"results"`
 }

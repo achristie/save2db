@@ -26,10 +26,13 @@ func New(apiKey *string, username *string, password *string) *Client {
 	}
 }
 
-func (c *Client) CallApi() {
-	u := c.baseURL + "market-data/v3/value/current/symbol?"
+func (c *Client) CallApi() SymbolHistory {
+	u := c.baseURL + "market-data/v3/value/history/mdc?"
 	params := url.Values{}
-	params.Add("filter", "symbol IN (\"PCAAS00\")")
+	params.Add("filter", "mdc IN (\"IF\") AND modDate >= \"2022-5-27\"")
+	params.Add("sort", "modDate: asc")
+	params.Add("pagesize", "5")
+	// params.Add("field", "deltaPrice, pValue, deltaPercent, pDate")
 	req, err := http.NewRequest(http.MethodGet, u+params.Encode(), nil)
 	if err != nil {
 		log.Print(err, "Could not make HTTP Request")
@@ -48,14 +51,16 @@ func (c *Client) CallApi() {
 	}
 	defer res.Body.Close()
 
-	var data CurrentSymbol
+	var data SymbolHistory
 
 	switch res.StatusCode {
 	case 200:
 		if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
 			log.Print(err)
 		}
-		log.Printf("%+v", data)
+		// log.Printf("%+v", data)
 	}
+
+	return data
 
 }
