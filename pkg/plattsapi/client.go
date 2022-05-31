@@ -16,7 +16,7 @@ type Client struct {
 	c        *http.Client
 }
 
-func New(apiKey *string, username *string, password *string) *Client {
+func NewClient(apiKey *string, username *string, password *string) *Client {
 	return &Client{
 		apiKey:   *apiKey,
 		baseURL:  "https://api.platts.com/",
@@ -31,8 +31,7 @@ func (c *Client) CallApi() SymbolHistory {
 	params := url.Values{}
 	params.Add("filter", "mdc IN (\"IF\") AND modDate >= \"2022-5-27\"")
 	params.Add("sort", "modDate: asc")
-	params.Add("pagesize", "5")
-	// params.Add("field", "deltaPrice, pValue, deltaPercent, pDate")
+	params.Add("pagesize", "9")
 	req, err := http.NewRequest(http.MethodGet, u+params.Encode(), nil)
 	if err != nil {
 		log.Print(err, "Could not make HTTP Request")
