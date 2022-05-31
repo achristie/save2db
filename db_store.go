@@ -72,7 +72,7 @@ func (f *MarketDataStore) AddPricingData(data plattsapi.SymbolHistory) {
 }
 
 func (f *MarketDataStore) insert(record *dbClass) {
-	ins := `INSERT INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
+	ins := `INSERT or REPLACE INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := f.database.Prepare(ins)
 	if err != nil {
 		log.Fatal(err)
