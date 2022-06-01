@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/achristie/save2db"
 	"github.com/achristie/save2db/pkg/plattsapi"
@@ -18,8 +19,12 @@ func main() {
 
 	flag.Parse()
 	client := plattsapi.NewClient(APIKey, Username, Password)
-	data := client.CallApi()
-
+	s := []string{"IF"}
+	data, err := client.GetHistoryByMDC(s)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("%+v", data)
 	MarketDataStore.AddPricingData(data)
 
 }

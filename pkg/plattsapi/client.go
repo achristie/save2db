@@ -2,6 +2,7 @@ package plattsapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -26,40 +27,34 @@ func NewClient(apiKey *string, username *string, password *string) *Client {
 	}
 }
 
-func (c *Client) CallApi() SymbolHistory {
-	u := c.baseURL + "market-data/v3/value/history/mdc?"
-	params := url.Values{}
-	params.Add("filter", "mdc IN (\"IF\") AND modDate >= \"2022-5-27\"")
-	params.Add("sort", "modDate: asc")
-	params.Add("pagesize", "9")
-	req, err := http.NewRequest(http.MethodGet, u+params.Encode(), nil)
-	if err != nil {
-		log.Print(err, "Could not make HTTP Request")
-	}
+func (c *Client) newRequest(path string, query url.Values) (*http.Request, error) {
+	url := &c.baseURL
+	req, _ := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
+
 	token := GetToken(c.username, c.password, c.apiKey)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("appkey", c.apiKey)
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	return req, nil
 
-	// requestDump, _ := httputil.DumpRequest(req, true)
-	// log.Println(string(requestDump))
+}
 
+func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
+	req.Close = true
+	log.Printf("[%s] %s", req.Method, req.URL)
 	res, err := c.c.Do(req)
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
 	defer res.Body.Close()
 
-	var data SymbolHistory
-
-	switch res.StatusCode {
-	case 200:
-		if err := json.NewDecoder(res.Body).Decode(&data); err != nil {
-			log.Print(err)
-		}
-		// log.Printf("%+v", data)
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("[%s] %s: %+v", req.Method, res.Status, res.Body)
 	}
 
-	return data
-
+	err = json.NewDecoder(res.Body).Decode(target)
+	if err != nil {
+		return nil, fmt.Errorf("response error %s %s: %s", req.Method, req.URL.RequestURI(), err)
+	}
+	return res, nil
 }
