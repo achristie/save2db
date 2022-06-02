@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"time"
 )
@@ -51,6 +52,9 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("[%s] %s: %+v", req.Method, res.Status, res.Body)
 	}
+
+	dump, _ := httputil.DumpResponse(res, true)
+	log.Printf("%q", dump)
 
 	err = json.NewDecoder(res.Body).Decode(target)
 	if err != nil {
