@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
 	platts "github.com/achristie/save2db/pkg/platts"
 )
@@ -56,7 +57,26 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 	return &MarketDataStore{database: db}
 }
 
-func (f *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
+func (m *MarketDataStore) GetLatestModifiedDate() time.Time {
+	row := m.database.QueryRow("SELECT max(modified_date) from market_data")
+	var result sql.NullTime
+	err := row.Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// If there is no data then start from 5 days ago
+			return time.Now().AddDate(0, 0, 5)
+		}
+		log.Fatal(err)
+	}
+	return result.Time
+	// t, err := time.Parse("2006-01-02T15:04:05", result.Time.String())
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// return t
+}
+
+func (m *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
 			record := dbClass{
@@ -67,7 +87,7 @@ func (f *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
 				assessedDate: v2.AssessDate,
 				isCorrected:  v2.IsCorrected,
 			}
-			f.insert(&record)
+			m.insert(&record)
 		}
 	}
 }

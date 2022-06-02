@@ -63,8 +63,7 @@ func (c *Client) GetSubscribedMDC() (ReferenceData, error) {
 
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {
 	params := url.Values{}
-	s := fmt.Sprintf("%d-%d-%d %d:%d", StartTime.Year(), StartTime.Month(), StartTime.Day(), StartTime.Hour(), StartTime.Minute())
-	params.Add("filter", fmt.Sprintf("mdc IN (\"%s\") AND modDate >= \"%s\"", Mdc, s))
+	params.Add("filter", fmt.Sprintf("mdc IN (\"%s\") AND modDate >= \"%s\"", Mdc, StartTime.Format("2006-01-02T15:04:05")))
 	params.Add("sort", "modDate: asc")
 	params.Add("pagesize", strconv.Itoa(PageSize))
 	params.Add("page", strconv.Itoa(Page))

@@ -17,6 +17,7 @@ func main() {
 	Password := flag.String("password", "NULL", "Password associated with Username")
 	flag.Parse()
 
+	// A Platts API Client
 	client := platts.NewClient(APIKey, Username, Password)
 
 	// rd, err := client.GetSubscribedMDC()
@@ -27,19 +28,32 @@ func main() {
 	// 	log.Print(k, v)
 	// }
 
-	MarketDataStore := save2db.InitializeDb("database7.db")
+	// Initialize DB and create market_data table if it does not exist
+	MarketDataStore := save2db.InitializeDb("database9.db")
+
+	// Initial parameters
 	page := 1
+	log.Println(MarketDataStore.GetLatestModifiedDate())
 	start := time.Now().AddDate(0, 0, -30)
+	pageSize := 20
+
+	// Page through response
 	for {
-		sh, err := client.GetHistoryByMDC("AT", start, page, 10)
+		// Call History API
+		sh, err := client.GetHistoryByMDC("AT", start, page, pageSize)
 		if err != nil {
-			log.Println(err)
+			log.Fatal(err)
 		}
 
+		// Add Response to database
 		MarketDataStore.AddPricingData(sh)
+
+		// Exit loop when all records have been fetched
 		if sh.Metadata.TotalPages == page {
 			break
 		}
+
+		// Avoid getting throttled by the API
 		time.Sleep(2 * time.Second)
 		page += 1
 	}
