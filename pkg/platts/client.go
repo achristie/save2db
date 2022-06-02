@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"time"
 )
@@ -42,7 +41,8 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
 	req.Close = true
-	log.Printf("[%s] %s", req.Method, req.URL)
+	u, _ := url.QueryUnescape(req.URL.String())
+	log.Printf("[%s] %s", req.Method, u)
 	res, err := c.c.Do(req)
 	if err != nil {
 		return nil, err
@@ -52,9 +52,6 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("[%s] %s: %+v", req.Method, res.Status, res.Body)
 	}
-
-	dump, _ := httputil.DumpResponse(res, true)
-	log.Printf("%q", dump)
 
 	err = json.NewDecoder(res.Body).Decode(target)
 	if err != nil {

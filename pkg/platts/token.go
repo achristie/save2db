@@ -7,16 +7,23 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const TokenEndpoint = "https://api.platts.com/auth/api"
 
+var cache Token
+
 type Token struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	Iat          time.Time `json:"-"`
 }
 
 func GetToken(Username string, Password string, APIKey string) Token {
+	if time.Now().Before(cache.Iat.Add(45 * time.Minute)) {
+		return cache
+	}
 	data := url.Values{}
 	data.Set("username", Username)
 	data.Set("password", Password)
@@ -45,5 +52,7 @@ func GetToken(Username string, Password string, APIKey string) Token {
 	if err = j.Decode(&token); err != nil {
 		log.Fatal(err)
 	}
+	token.Iat = time.Now()
+	cache = token
 	return token
 }

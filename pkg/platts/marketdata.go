@@ -1,12 +1,16 @@
 package plattsapi
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 type Facets struct {
-	FacetCounts *json.RawMessage `json:"facet_counts"`
+	FacetCounts struct {
+		Mdc map[string]string `json:"mdc"`
+	} `json:"facet_counts"`
 }
 
 type ReferenceData struct {
@@ -57,11 +61,13 @@ func (c *Client) GetSubscribedMDC() (ReferenceData, error) {
 
 }
 
-func (c *Client) GetHistoryByMDC(mdc []string) (SymbolHistory, error) {
+func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {
 	params := url.Values{}
-	params.Add("filter", "mdc IN (\"IF\") AND modDate >= \"2022-5-27\"")
+	s := fmt.Sprintf("%d-%d-%d %d:%d", StartTime.Year(), StartTime.Month(), StartTime.Day(), StartTime.Hour(), StartTime.Minute())
+	params.Add("filter", fmt.Sprintf("mdc IN (\"%s\") AND modDate >= \"%s\"", Mdc, s))
 	params.Add("sort", "modDate: asc")
-	params.Add("pagesize", "5")
+	params.Add("pagesize", strconv.Itoa(PageSize))
+	params.Add("page", strconv.Itoa(Page))
 	req, err := c.newRequest("market-data/v3/value/history/mdc", params)
 
 	if err != nil {

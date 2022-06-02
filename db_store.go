@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/achristie/save2db/pkg/plattsapi"
+	platts "github.com/achristie/save2db/pkg/platts"
 )
 
 type MarketDataStore struct {
@@ -28,8 +28,9 @@ func createTable(db *sql.DB) {
 		"price" NUM NOT NULL,
 		"assessed_date" datetime NOT NULL,
 		"modified_date" datetime NOT NULL,
-		"is_corrected" string NOT NULL,
-		PRIMARY KEY (symbol, bate, assessed_date) );`
+		"is_corrected" string NOT NULL
+	);`
+	// PRIMARY KEY (symbol, bate, assessed_date) );`
 	query, err := db.Prepare(market_data_table)
 	if err != nil {
 		log.Fatal(err)
@@ -55,7 +56,7 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 	return &MarketDataStore{database: db}
 }
 
-func (f *MarketDataStore) AddPricingData(data plattsapi.SymbolHistory) {
+func (f *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
 			record := dbClass{
