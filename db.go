@@ -22,6 +22,7 @@ type dbClass struct {
 	isCorrected  string
 }
 
+// creating the market_data table
 func createTable(db *sql.DB) {
 	market_data_table := `CREATE TABLE IF NOT EXISTS market_data (
 		"symbol" TEXT NOT NULL,
@@ -40,6 +41,8 @@ func createTable(db *sql.DB) {
 	log.Println("db: market_data table created succesfully")
 }
 
+// Create our DB (if it does not exist)
+// and create `market_data` table
 func InitializeDb(dbFileName string) *MarketDataStore {
 	file, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
 
@@ -57,6 +60,10 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 	return &MarketDataStore{database: db}
 }
 
+// Get the MAX modified_date
+// Useful to illustrate calling the GetHistory Endpoint
+// With modified_date >= the max modified date in our DB
+// Has a default value to prevent going too far back in time
 func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
 	// must cast into a string because of gosql driver issues
 	row := m.database.QueryRow("SELECT CAST(max(modified_date) as text) from market_data")
@@ -76,6 +83,7 @@ func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
 	return t
 }
 
+// Remove a Symbol-Bate-Assessed Date from the DB
 func (m *MarketDataStore) Remove(data platts.SymbolCorrection) (int, error) {
 	var records []dbClass
 	for _, v := range data.Results {
@@ -94,6 +102,7 @@ func (m *MarketDataStore) Remove(data platts.SymbolCorrection) (int, error) {
 	return len(records), nil
 }
 
+// del is the internal implementation for Remove
 func (m *MarketDataStore) del(records []dbClass) error {
 	del := `DELETE FROM market_data where symbol = ? and bate = ? and assessed_date = ?`
 	query, err := m.database.Prepare(del)
@@ -118,6 +127,7 @@ func (m *MarketDataStore) del(records []dbClass) error {
 	return tx.Commit()
 }
 
+// Add symbol history to the database
 func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
 	var records []dbClass
 	// change data structure for ease of INSERT
@@ -140,6 +150,7 @@ func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
 	return len(records), nil
 }
 
+// insert is the internal implementation for Add
 func (m *MarketDataStore) insert(records []dbClass) error {
 	ins := `INSERT or REPLACE INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := m.database.Prepare(ins)
