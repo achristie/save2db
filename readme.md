@@ -25,7 +25,7 @@ This example is shows how to grab Market Data from the Platts API and store it i
 - Get an Access Token
 - Get a list of MDC (Market Data Category) the User has access to
 - For each MDC retrieve pricing data since time `t`
-- (not shown) `t` should slide so that you're updating `t` every invocation based on the time of your previous invocation
 - Page through results (if necessary)
 - Store results in database
-- (not shown) Execute the function in a CRON job. Sliding the modified date forward
+- Get corrections (deletes) since time `t` and remove from database
+- (not shown) `t` should slide so that you're updating `t` every invocation based on the time of your previous invocation
