@@ -21,20 +21,8 @@ func main() {
 	// create a platts api client
 	client := platts.NewClient(APIKey, Username, Password)
 
-	sc, err := client.GetDeletes(time.Now().AddDate(0, -2, 0), 1, 1000)
-
-	log.Printf("%+v", sc)
-
 	// initialize DB and create market_data table if it does not exist
-	MarketDataStore := save2db.InitializeDb("database10.db")
-
-	i, err := MarketDataStore.Remove(sc)
-	if err != nil {
-		log.Printf("error deleting records: %s", err)
-	}
-	log.Printf("deleted [%d] records from DB", i)
-
-	log.Fatal()
+	db := save2db.InitializeDb("database.db")
 
 	// initial parameters
 	page := 1
@@ -42,9 +30,24 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not get list of MDCs: %s", err)
 	}
-	start := MarketDataStore.GetLatestOrDefaultModifiedDate()
-	pageSize := 20
+	start := db.GetLatestOrDefaultModifiedDate()
+	pageSize := 10000
 
+	// Update market_data table with records modified since START
+	UpdateHistory(client, db, MDCs, start, page, pageSize)
+
+	// Update market_data table with records marked for deletion
+	// `start` is using a sliding value for demonstration purposes
+	// ideally you would store this value each time and use the previous value to get any changes
+	// since the last invocation
+	UpdateCorrections(client, db, time.Now().AddDate(0, -3, 0))
+
+}
+
+// Uses the `client` to fetch historical data for each MDC modified since `start`
+// Automatically pages through all results
+// and stores data into `db`
+func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []string, start time.Time, page int, pageSize int) {
 	// loop through every MDC
 	for _, v := range MDCs {
 		// loop until everything is fetched
@@ -54,12 +57,12 @@ func main() {
 
 			// if there is an error then log it and go to the next MDC
 			if err != nil {
-				log.Print(err)
+				log.Printf("error getting history: %s", err)
 				break
 			}
 
 			// add data to database
-			i, err := MarketDataStore.Add(sh)
+			i, err := db.Add(sh)
 			if err != nil {
 				log.Print("error inserting records: ", err)
 			}
@@ -78,4 +81,16 @@ func main() {
 		page = 1
 		time.Sleep(2 * time.Second)
 	}
+}
+
+func UpdateCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
+	sc, err := client.GetDeletes(time.Now().AddDate(0, -2, 0), 1, 1000)
+	if err != nil {
+		log.Printf("error getting corrections: %s", err)
+	}
+	i, err := db.Remove(sc)
+	if err != nil {
+		log.Printf("error deleting records: %s", err)
+	}
+	log.Printf("deleted [%d] records from DB", i)
 }
