@@ -33,11 +33,11 @@ func (c *Client) GetSubscribedMDC() ([]string, error) {
 
 }
 
-// Only need to get DEL because UPD is handled by correction endpoint
+// Only need to get DEL because UPD is handled by modified date endpoint
 func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (SymbolCorrection, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("correctionType:\"DEL\" AND modDate >= \"%s\"", StartTime.Format("2006-01-02T15:04:05")))
-	params.Add("sort", "modDate: asc")
+	params.Add("sort", "modDate: asc") // important for paging properly
 	params.Add("pagesize", strconv.Itoa(PageSize))
 	params.Add("page", strconv.Itoa(Page))
 
@@ -58,7 +58,7 @@ func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (Symbol
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("mdc IN (\"%s\") AND modDate >= \"%s\"", Mdc, StartTime.Format("2006-01-02T15:04:05")))
-	params.Add("sort", "modDate: asc")
+	params.Add("sort", "modDate: asc") // important for paging properly
 	params.Add("pagesize", strconv.Itoa(PageSize))
 	params.Add("page", strconv.Itoa(Page))
 

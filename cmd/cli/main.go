@@ -84,7 +84,7 @@ func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []st
 }
 
 func UpdateCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
-	sc, err := client.GetDeletes(time.Now().AddDate(0, -2, 0), 1, 1000)
+	sc, err := client.GetDeletes(start, 1, 10000)
 	if err != nil {
 		log.Printf("error getting corrections: %s", err)
 	}
