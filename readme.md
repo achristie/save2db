@@ -4,8 +4,7 @@
 
 ```
 go get github.com/mattn/go-sqlite3
-cd cmd/cli
-go run main.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
+go run cmd/cli/main.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
 ```
 
 Then check out the data in sqlite database
