@@ -26,21 +26,21 @@ func main() {
 
 	// initial parameters
 	page := 1
+	pageSize := 10000
 	MDCs, err := client.GetSubscribedMDC()
 	if err != nil {
 		log.Fatalf("Could not get list of MDCs: %s", err)
 	}
-	start := db.GetLatestOrDefaultModifiedDate()
-	pageSize := 10000
+	// using 7 days ago for demonstration purposes
+	// ideally you would store this value along side your data and use the previous value to get any changes
+	// since the last invocation
+	start := time.Now().UTC().AddDate(0, 0, -7)
 
 	// Update market_data table with records modified since `start`
 	UpdateHistory(client, db, MDCs, start, page, pageSize)
 
-	// Update market_data table with records marked for deletion
-	// `start` is using a sliding value for demonstration purposes
-	// ideally you would store this value each time and use the previous value to get any changes
-	// since the last invocation
-	UpdateCorrections(client, db, time.Now().AddDate(0, -3, 0))
+	// Update market_data table with records marked for deletion since `start`
+	UpdateCorrections(client, db, start)
 
 }
 

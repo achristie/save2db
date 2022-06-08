@@ -38,7 +38,7 @@ type SymbolHistory struct {
 		Symbol string `json:"symbol"`
 		Data   []struct {
 			Bate        string  `json:"bate"`
-			Value       float32 `json:"value"`
+			Value       float64 `json:"value"`
 			AssessDate  string  `json:"assessDate"`
 			IsCorrected string  `json:"isCorrected"`
 			ModDate     string  `json:"modDate"`

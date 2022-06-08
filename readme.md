@@ -8,6 +8,14 @@ cd cmd/cli
 go run main.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
 ```
 
+Then check out the data in sqlite database
+
+```
+sqlite3 database.db
+SELECT * FROM market_data
+LIMIT 20;
+```
+
 ## Explanation
 
 **This is not production ready code. This is only meant to show a typical use case.**
@@ -16,7 +24,8 @@ This example is shows how to grab Market Data from the Platts API and store it i
 
 - Get an Access Token
 - Get a list of MDC (Market Data Category) the User has access to
-- For each MDC retrieve pricing data - using the `MAX(modified_date)` from DB as the starting point
+- For each MDC retrieve pricing data since time `t`
+- (not shown) `t` should slide so that you're updating `t` every invocation based on the time of your previous invocation
 - Page through results (if necessary)
 - Store results in database
 - (not shown) Execute the function in a CRON job. Sliding the modified date forward

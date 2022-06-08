@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"time"
 
 	platts "github.com/achristie/save2db/pkg/platts"
 )
@@ -18,7 +17,7 @@ type dbClass struct {
 	bate         string
 	modifiedDate string
 	assessedDate string
-	price        float32
+	price        float64
 	isCorrected  string
 }
 
@@ -58,29 +57,6 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 	createTable(db)
 
 	return &MarketDataStore{database: db}
-}
-
-// Get the MAX modified_date
-// Useful to illustrate calling the GetHistory Endpoint
-// With modified_date >= the max modified date in our DB
-// Has a default value to prevent going too far back in time
-func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
-	// must cast into a string because of gosql driver issues
-	row := m.database.QueryRow("SELECT CAST(max(modified_date) as text) from market_data")
-
-	var result sql.NullString
-	err := row.Scan(&result)
-	defDate := time.Now().UTC().AddDate(0, 0, -7)
-
-	if err != nil {
-		return defDate
-	}
-	t, err := time.Parse("2006-01-02T15:04:05", result.String)
-	if err != nil {
-		log.Printf("db: Modified Date is null. Returning Default (Now - 7 Days) Value: %s", defDate)
-		return defDate
-	}
-	return t
 }
 
 // Remove a Symbol-Bate-Assessed Date from the DB
