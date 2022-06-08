@@ -1,4 +1,4 @@
-package plattsapi
+package platts
 
 import (
 	"encoding/json"

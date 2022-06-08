@@ -1,4 +1,4 @@
-package plattsapi
+package platts
 
 type Facets struct {
 	FacetCounts struct {
