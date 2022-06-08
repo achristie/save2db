@@ -76,6 +76,48 @@ func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
 	return t
 }
 
+func (m *MarketDataStore) Remove(data platts.SymbolCorrection) (int, error) {
+	var records []dbClass
+	for _, v := range data.Results {
+		for _, v2 := range v.Data {
+			records = append(records, dbClass{
+				symbol:       v.Symbol,
+				bate:         v2.Bate,
+				assessedDate: v2.AssessDate,
+			})
+		}
+	}
+	err := m.del(records)
+	if err != nil {
+		return 0, err
+	}
+	return len(records), nil
+}
+
+func (m *MarketDataStore) del(records []dbClass) error {
+	del := `DELETE FROM market_data where symbol = ? and bate = ? and assessed_date = ?`
+	query, err := m.database.Prepare(del)
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// bulk delete
+	tx, err := m.database.Begin()
+	if err != nil {
+		return err
+	}
+
+	for _, r := range records {
+		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.assessedDate)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
 	var records []dbClass
 	// change data structure for ease of INSERT

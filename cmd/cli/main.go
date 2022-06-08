@@ -21,8 +21,20 @@ func main() {
 	// create a platts api client
 	client := platts.NewClient(APIKey, Username, Password)
 
+	sc, err := client.GetDeletes(time.Now().AddDate(0, -2, 0), 1, 1000)
+
+	log.Printf("%+v", sc)
+
 	// initialize DB and create market_data table if it does not exist
 	MarketDataStore := save2db.InitializeDb("database10.db")
+
+	i, err := MarketDataStore.Remove(sc)
+	if err != nil {
+		log.Printf("error deleting records: %s", err)
+	}
+	log.Printf("deleted [%d] records from DB", i)
+
+	log.Fatal()
 
 	// initial parameters
 	page := 1
@@ -31,7 +43,7 @@ func main() {
 		log.Fatalf("Could not get list of MDCs: %s", err)
 	}
 	start := MarketDataStore.GetLatestOrDefaultModifiedDate()
-	pageSize := 2000
+	pageSize := 20
 
 	// loop through every MDC
 	for _, v := range MDCs {
@@ -51,7 +63,7 @@ func main() {
 			if err != nil {
 				log.Print("error inserting records: ", err)
 			}
-			log.Printf("Added [%d] records to DB", i)
+			log.Printf("added [%d] records to DB", i)
 
 			// exit loop when all data has been fetched
 			if sh.Metadata.TotalPages == page || sh.Metadata.TotalPages == 0 {
