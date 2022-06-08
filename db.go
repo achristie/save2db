@@ -60,7 +60,7 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 }
 
 // Remove a Symbol-Bate-Assessed Date from the DB
-func (m *MarketDataStore) Remove(data platts.SymbolCorrection) (int, error) {
+func (m *MarketDataStore) Remove(data platts.SymbolCorrection) error {
 	var records []dbClass
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
@@ -71,11 +71,7 @@ func (m *MarketDataStore) Remove(data platts.SymbolCorrection) (int, error) {
 			})
 		}
 	}
-	err := m.del(records)
-	if err != nil {
-		return 0, err
-	}
-	return len(records), nil
+	return m.del(records)
 }
 
 // del is the internal implementation for Remove
@@ -104,7 +100,7 @@ func (m *MarketDataStore) del(records []dbClass) error {
 }
 
 // Add symbol history to the database
-func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
+func (m *MarketDataStore) Add(data platts.SymbolHistory) error {
 	var records []dbClass
 	// change data structure for ease of INSERT
 	for _, v := range data.Results {
@@ -119,11 +115,7 @@ func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
 			})
 		}
 	}
-	err := m.insert(records)
-	if err != nil {
-		return 0, err
-	}
-	return len(records), nil
+	return m.insert(records)
 }
 
 // insert is the internal implementation for Add

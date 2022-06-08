@@ -63,11 +63,11 @@ func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []st
 			}
 
 			// add data to database
-			i, err := db.Add(sh)
-			if err != nil {
+			if err := db.Add(sh); err != nil {
 				log.Print("error inserting records: ", err)
 			}
-			log.Printf("added [%d] records to DB", i)
+
+			log.Printf("Fetched up to [%d] of [%d] records in [%s] and added to DB", sh.Metadata.PageSize, sh.Metadata.Count, sh.Metadata.QueryTime)
 
 			// exit loop when all data has been fetched
 			if sh.Metadata.TotalPages == page || sh.Metadata.TotalPages == 0 {
@@ -89,9 +89,8 @@ func UpdateCorrections(client *platts.Client, db *save2db.MarketDataStore, start
 	if err != nil {
 		log.Printf("error getting corrections: %s", err)
 	}
-	i, err := db.Remove(sc)
-	if err != nil {
+	if err := db.Remove(sc); err != nil {
 		log.Printf("error deleting records: %s", err)
 	}
-	log.Printf("deleted [%d] records from DB", i)
+	log.Printf("Fetched [%d] records in [%s] and removed from DB", sc.Metadata.PageSize, sc.Metadata.QueryTime)
 }
