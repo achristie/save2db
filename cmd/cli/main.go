@@ -17,6 +17,7 @@ func main() {
 	Username := flag.String("username", "NULL", "Username to get a token")
 	Password := flag.String("password", "NULL", "Password associated with Username")
 	StartDate := flag.String("t", time.Now().UTC().AddDate(0, 0, -3).Format("2006-01-02T15:04:05"), "Get updates since date. Format 2006-01-02T15:04:05")
+	PageSize := flag.Int("p", 1000, "The page size to use for API Calls. Max is 10,000")
 	flag.Parse()
 
 	// create a platts api client
@@ -30,14 +31,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	pageSize := 10000
 	MDCs, err := client.GetSubscribedMDC()
 	if err != nil {
 		log.Fatalf("Could not get list of MDCs: %s", err)
 	}
 
 	// Update market_data table with records modified since `start`
-	UpdateHistory(client, db, MDCs, start, pageSize)
+	UpdateHistory(client, db, MDCs, start, *PageSize)
 
 	// Update market_data table with records marked for deletion since `start`
 	UpdateCorrections(client, db, start)
