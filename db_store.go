@@ -76,31 +76,47 @@ func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
 	return t
 }
 
-func (m *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
+func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
+	var records []dbClass
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
-			record := dbClass{
+			records = append(records, dbClass{
 				symbol:       v.Symbol,
 				bate:         v2.Bate,
 				price:        v2.Value,
 				modifiedDate: v2.ModDate,
 				assessedDate: v2.AssessDate,
 				isCorrected:  v2.IsCorrected,
-			}
-			m.insert(&record)
+			})
 		}
 	}
+	err := m.insert(records)
+	if err != nil {
+		return 0, err
+	}
+	return len(records), nil
 }
 
-func (m *MarketDataStore) insert(record *dbClass) {
+func (m *MarketDataStore) insert(records []dbClass) error {
 	ins := `INSERT or REPLACE INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := m.database.Prepare(ins)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
-	_, err = query.Exec(record.symbol, record.bate, record.price, record.assessedDate, record.modifiedDate, record.isCorrected)
+	defer query.Close()
+
+	// bulk insert
+	tx, err := m.database.Begin()
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
+	for _, r := range records {
+		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.price, r.assessedDate, r.modifiedDate, r.isCorrected)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
 }

@@ -40,21 +40,25 @@ func main() {
 			// call history endpoint
 			sh, err := client.GetHistoryByMDC(v, start, page, pageSize)
 
-			// if there is an error log and go to the next MDC
+			// if there is an error then log it and go to the next MDC
 			if err != nil {
 				log.Print(err)
 				break
 			}
 
 			// add data to database
-			MarketDataStore.AddPricingData(sh)
+			i, err := MarketDataStore.Add(sh)
+			if err != nil {
+				log.Print("error inserting records: ", err)
+			}
+			log.Printf("Added [%d] records to DB", i)
 
 			// exit loop when all data has been fetched
 			if sh.Metadata.TotalPages == page || sh.Metadata.TotalPages == 0 {
 				break
 			}
 
-			// Avoid getting throttled by the API
+			// avoid getting throttled by the API
 			time.Sleep(2 * time.Second)
 			page += 1
 		}
