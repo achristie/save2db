@@ -78,6 +78,7 @@ func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
 
 func (m *MarketDataStore) Add(data platts.SymbolHistory) (int, error) {
 	var records []dbClass
+	// change data structure for ease of INSERT
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
 			records = append(records, dbClass{
