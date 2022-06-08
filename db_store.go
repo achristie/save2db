@@ -37,7 +37,7 @@ func createTable(db *sql.DB) {
 		log.Fatal(err)
 	}
 	query.Exec()
-	log.Println("market_data table created succesfully")
+	log.Println("db: market_data table created succesfully")
 }
 
 func InitializeDb(dbFileName string) *MarketDataStore {
@@ -57,23 +57,23 @@ func InitializeDb(dbFileName string) *MarketDataStore {
 	return &MarketDataStore{database: db}
 }
 
-func (m *MarketDataStore) GetLatestModifiedDate() time.Time {
-	row := m.database.QueryRow("SELECT max(modified_date) from market_data")
-	var result sql.NullTime
+func (m *MarketDataStore) GetLatestOrDefaultModifiedDate() time.Time {
+	// must cast into a string because of gosql driver issues
+	row := m.database.QueryRow("SELECT CAST(max(modified_date) as text) from market_data")
+
+	var result sql.NullString
 	err := row.Scan(&result)
+	defDate := time.Now().UTC().AddDate(0, 0, -7)
+
 	if err != nil {
-		if err == sql.ErrNoRows {
-			// If there is no data then start from 5 days ago
-			return time.Now().AddDate(0, 0, 5)
-		}
-		log.Fatal(err)
+		return defDate
 	}
-	return result.Time
-	// t, err := time.Parse("2006-01-02T15:04:05", result.Time.String())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// return t
+	t, err := time.Parse("2006-01-02T15:04:05", result.String)
+	if err != nil {
+		log.Printf("db: Modified Date is null. Returning Default (Now - 7 Days) Value: %s", defDate)
+		return defDate
+	}
+	return t
 }
 
 func (m *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
@@ -92,11 +92,11 @@ func (m *MarketDataStore) AddPricingData(data platts.SymbolHistory) {
 	}
 }
 
-func (f *MarketDataStore) insert(record *dbClass) {
+func (m *MarketDataStore) insert(record *dbClass) {
 	ins := `INSERT or REPLACE INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
-	query, err := f.database.Prepare(ins)
+	query, err := m.database.Prepare(ins)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	_, err = query.Exec(record.symbol, record.bate, record.price, record.assessedDate, record.modifiedDate, record.isCorrected)
 	if err != nil {

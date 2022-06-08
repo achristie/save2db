@@ -40,24 +40,29 @@ type SymbolHistory struct {
 	} `json:"results"`
 }
 
-func (c *Client) GetSubscribedMDC() (ReferenceData, error) {
+func (c *Client) GetSubscribedMDC() ([]string, error) {
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
 	params.Add("Facet.Field", "mdc")
+	params.Add("Field", "symbol")
 	params.Add("PageSize", "1")
 
 	req, err := c.newRequest("market-data/reference-data/v3/search", params)
 
 	if err != nil {
-		return ReferenceData{}, err
+		return []string{}, err
 	}
 	var result ReferenceData
 
 	if _, err = c.do(req, &result); err != nil {
-		return ReferenceData{}, err
+		return []string{}, err
 	}
 
-	return result, nil
+	var s []string
+	for k := range result.Facets.FacetCounts.Mdc {
+		s = append(s, k)
+	}
+	return s, nil
 
 }
 

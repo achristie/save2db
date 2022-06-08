@@ -3,6 +3,7 @@ package plattsapi
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -50,12 +51,13 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("[%s] %s: %+v", req.Method, res.Status, res.Body)
+		body, _ := ioutil.ReadAll(res.Body)
+		return nil, fmt.Errorf("[%s] %s: %s", req.Method, res.Status, body)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(target)
 	if err != nil {
-		return nil, fmt.Errorf("response error %s %s: %s", req.Method, req.URL.RequestURI(), err)
+		return nil, fmt.Errorf("response error [%s] %s: %s", req.Method, req.URL.RequestURI(), err)
 	}
 	return res, nil
 }

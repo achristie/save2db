@@ -12,49 +12,54 @@ import (
 )
 
 func main() {
+	// read cmd line arguments
 	APIKey := flag.String("apikey", "NULL", "API Key to call API with")
 	Username := flag.String("username", "NULL", "Username to get a token")
 	Password := flag.String("password", "NULL", "Password associated with Username")
 	flag.Parse()
 
-	// A Platts API Client
+	// create a platts api client
 	client := platts.NewClient(APIKey, Username, Password)
 
-	// rd, err := client.GetSubscribedMDC()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// for k, v := range rd.Facets.FacetCounts.Mdc {
-	// 	log.Print(k, v)
-	// }
+	// initialize DB and create market_data table if it does not exist
+	MarketDataStore := save2db.InitializeDb("database10.db")
 
-	// Initialize DB and create market_data table if it does not exist
-	MarketDataStore := save2db.InitializeDb("database9.db")
-
-	// Initial parameters
+	// initial parameters
 	page := 1
-	log.Println(MarketDataStore.GetLatestModifiedDate())
-	start := time.Now().AddDate(0, 0, -30)
-	pageSize := 20
+	MDCs, err := client.GetSubscribedMDC()
+	if err != nil {
+		log.Fatalf("Could not get list of MDCs: %s", err)
+	}
+	start := MarketDataStore.GetLatestOrDefaultModifiedDate()
+	pageSize := 2000
 
-	// Page through response
-	for {
-		// Call History API
-		sh, err := client.GetHistoryByMDC("AT", start, page, pageSize)
-		if err != nil {
-			log.Fatal(err)
+	// loop through every MDC
+	for _, v := range MDCs {
+		// loop until everything is fetched
+		for {
+			// call history endpoint
+			sh, err := client.GetHistoryByMDC(v, start, page, pageSize)
+
+			// if there is an error log and go to the next MDC
+			if err != nil {
+				log.Print(err)
+				break
+			}
+
+			// add data to database
+			MarketDataStore.AddPricingData(sh)
+
+			// exit loop when all data has been fetched
+			if sh.Metadata.TotalPages == page || sh.Metadata.TotalPages == 0 {
+				break
+			}
+
+			// Avoid getting throttled by the API
+			time.Sleep(2 * time.Second)
+			page += 1
 		}
-
-		// Add Response to database
-		MarketDataStore.AddPricingData(sh)
-
-		// Exit loop when all records have been fetched
-		if sh.Metadata.TotalPages == page {
-			break
-		}
-
-		// Avoid getting throttled by the API
+		// reset page counter, sleep for throttling
+		page = 1
 		time.Sleep(2 * time.Second)
-		page += 1
 	}
 }
