@@ -16,6 +16,7 @@ func main() {
 	APIKey := flag.String("apikey", "NULL", "API Key to call API with")
 	Username := flag.String("username", "NULL", "Username to get a token")
 	Password := flag.String("password", "NULL", "Password associated with Username")
+	StartDate := flag.String("t", time.Now().UTC().AddDate(0, 0, -3).Format("2006-01-02T15:04:05"), "Get updates since date. Format 2006-01-02T15:04:05")
 	flag.Parse()
 
 	// create a platts api client
@@ -25,19 +26,18 @@ func main() {
 	db := save2db.InitializeDb("database.db")
 
 	// initial parameters
-	page := 1
+	start, err := time.Parse("2006-01-02T15:04:05", *StartDate)
+	if err != nil {
+		log.Fatal(err)
+	}
 	pageSize := 10000
 	MDCs, err := client.GetSubscribedMDC()
 	if err != nil {
 		log.Fatalf("Could not get list of MDCs: %s", err)
 	}
-	// using 7 days ago for demonstration purposes
-	// ideally you would store this value along side your data and use the previous value to get any changes
-	// since the last invocation
-	start := time.Now().UTC().AddDate(0, 0, -7)
 
 	// Update market_data table with records modified since `start`
-	UpdateHistory(client, db, MDCs, start, page, pageSize)
+	UpdateHistory(client, db, MDCs, start, pageSize)
 
 	// Update market_data table with records marked for deletion since `start`
 	UpdateCorrections(client, db, start)
@@ -47,8 +47,9 @@ func main() {
 // Uses the `client` to fetch historical data for each MDC modified since `start`
 // Automatically pages through all results
 // and stores data into `db`
-func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []string, start time.Time, page int, pageSize int) {
+func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []string, start time.Time, pageSize int) {
 	// loop through every MDC
+	page := 1
 	for _, v := range MDCs {
 		// loop until everything is fetched
 		for {

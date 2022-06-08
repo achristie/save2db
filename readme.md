@@ -4,7 +4,7 @@
 
 ```
 go get github.com/mattn/go-sqlite3
-go run cmd/cli/main.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
+go run cmd/cli/main.go -t 2022-06-10T16:00:00 -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
 ```
 
 Then check out the data in the sqlite database
@@ -19,7 +19,7 @@ LIMIT 20;
 
 **This is not production ready code. This is only meant to show a typical use case.**
 
-This example shows how to grab Market Data from the Platts API and store it in a database. By using `modified_date` we are able to get all updates since a particular point in time. The idea is then to execute this function on an interval (~20 min) with a sliding modified date in order to keep your local database up to date. Additionally, we call the `corrections` endpoint in order to remove records which have been marked for deletion.
+This example shows how to grab Market Data from the Platts API and store it in a database. By using `modified_date` in the API we are able to get all updates since a particular point in time. The idea is then to execute this function on an interval (~20 min) with a sliding `t` in order to keep your local database up to date. Additionally, we call the `corrections` endpoint in order to remove records which have been marked for deletion.
 
 Rough outline of what is included here:
 
