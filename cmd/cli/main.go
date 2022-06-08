@@ -33,7 +33,7 @@ func main() {
 	start := db.GetLatestOrDefaultModifiedDate()
 	pageSize := 10000
 
-	// Update market_data table with records modified since START
+	// Update market_data table with records modified since `start`
 	UpdateHistory(client, db, MDCs, start, page, pageSize)
 
 	// Update market_data table with records marked for deletion
