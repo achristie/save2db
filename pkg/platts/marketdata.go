@@ -45,3 +45,8 @@ type SymbolHistory struct {
 		} `json:"data"`
 	} `json:"results"`
 }
+
+type MDCCount struct {
+	MDC         string
+	SymbolCount int
+}
