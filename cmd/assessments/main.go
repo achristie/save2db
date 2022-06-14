@@ -67,7 +67,7 @@ func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []st
 				log.Print("error inserting records: ", err)
 			}
 
-			log.Printf("Fetched up to [%d] of [%d] records in [%s] and added to DB", sh.Metadata.PageSize, sh.Metadata.Count, sh.Metadata.QueryTime)
+			log.Printf("Page [%d] - Fetched up to [%d] of [%d] records in [%s] and added to DB", page, sh.Metadata.PageSize, sh.Metadata.Count, sh.Metadata.QueryTime)
 
 			// exit loop when all data has been fetched
 			if sh.Metadata.TotalPages == page || sh.Metadata.TotalPages == 0 {

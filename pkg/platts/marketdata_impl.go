@@ -75,3 +75,23 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, Page
 	return result, nil
 
 }
+
+func (c *Client) GetRefData(Page int, PageSize int) (ReferenceData, error) {
+	params := url.Values{}
+	params.Add("subscribed_only", "true")
+	params.Add("pagesize", strconv.Itoa(PageSize))
+	params.Add("page", strconv.Itoa(Page))
+
+	req, err := c.newRequest("market-data/reference-data/v3/search", params)
+	if err != nil {
+		return ReferenceData{}, err
+	}
+
+	var result ReferenceData
+	if _, err = c.do(req, &result); err != nil {
+		return ReferenceData{}, err
+	}
+
+	return result, nil
+
+}
