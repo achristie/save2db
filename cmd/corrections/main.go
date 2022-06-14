@@ -32,11 +32,11 @@ func main() {
 	}
 
 	// Update market_data table with records marked for deletion since `start`
-	UpdateCorrections(client, db, start)
+	GetCorrections(client, db, start)
 
 }
 
-func UpdateCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
+func GetCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
 	page := 1
 	for {
 		sc, err := client.GetDeletes(start, page, 100)

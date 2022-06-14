@@ -37,17 +37,14 @@ func main() {
 	}
 
 	// Update market_data table with records modified since `start`
-	UpdateHistory(client, db, MDCs, start, *PageSize)
-
-	// Update market_data table with records marked for deletion since `start`
-	UpdateCorrections(client, db, start)
+	GetAssessments(client, db, MDCs, start, *PageSize)
 
 }
 
 // Uses the `client` to fetch historical data for each MDC modified since `start`
 // Automatically pages through all results
 // and stores data into `db`
-func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []string, start time.Time, pageSize int) {
+func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDCs []string, start time.Time, pageSize int) {
 	// loop through every MDC
 	page := 1
 	for _, v := range MDCs {
@@ -82,15 +79,4 @@ func UpdateHistory(client *platts.Client, db *save2db.MarketDataStore, MDCs []st
 		page = 1
 		time.Sleep(2 * time.Second)
 	}
-}
-
-func UpdateCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
-	sc, err := client.GetDeletes(start, 1, 10000)
-	if err != nil {
-		log.Printf("error getting corrections: %s", err)
-	}
-	if err := db.Remove(sc); err != nil {
-		log.Printf("error deleting records: %s", err)
-	}
-	log.Printf("Fetched [%d] records in [%s] and removed from DB", sc.Metadata.PageSize, sc.Metadata.QueryTime)
 }
