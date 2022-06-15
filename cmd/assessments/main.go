@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/achristie/save2db"
@@ -23,6 +24,8 @@ func main() {
 
 	// create a platts api client
 	client := platts.NewClient(APIKey, Username, Password)
+	t := platts.GetToken(*Username, *Password, *APIKey)
+	log.Print(t)
 
 	// initialize DB and create market_data table if it does not exist
 	db := save2db.InitializeDb("database.db")
@@ -34,8 +37,32 @@ func main() {
 	}
 
 	// Update market_data table with records modified since `start`
-	GetAssessments(client, db, *MDC, start, *PageSize)
+	// GetAssessments(client, db, *MDC, start, *PageSize)
 
+	var wg sync.WaitGroup
+	guard := make(chan struct{}, 2)
+	for i := 1; i <= 9; i++ {
+		wg.Add(1)
+
+		go func(page int) {
+			defer wg.Done()
+			guard <- struct{}{}
+
+			sh, err := client.GetHistoryByMDC(*MDC, start, page, *PageSize)
+
+			if err != nil {
+				log.Print(err)
+			}
+			log.Printf("Page [%d] - Fetched up to [%d] of [%d] records in [%s] and added to DB", page, sh.Metadata.PageSize, sh.Metadata.Count, sh.Metadata.QueryTime)
+			if err := db.Add(sh); err != nil {
+				log.Print("error inserting records: ", err)
+			}
+			<-guard
+
+		}(i)
+
+	}
+	wg.Wait()
 }
 
 // Uses the `client` to fetch historical data for given MDC modified since `start`
