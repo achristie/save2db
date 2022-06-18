@@ -42,7 +42,7 @@ func main() {
 // Uses the concurrent get history method to fetch data in parallel
 // Store results in DB
 func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC string, start time.Time, pageSize int) {
-	ch := make(chan platts.SymbolHistory)
+	ch := make(chan platts.Result)
 
 	go func() {
 		err := client.ConcurrentGetHistoryByMDC(MDC, start, pageSize, ch)
@@ -51,9 +51,12 @@ func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC stri
 		}
 	}()
 
-	for sh := range ch {
-		log.Printf("[%d] records received from page [%d]. Adding to DB", len(sh.Results), sh.Metadata.Page)
-		if err := db.Add(sh); err != nil {
+	for result := range ch {
+		if result.Err != nil {
+			log.Printf("Error retrieving data: %s", result.Err)
+		}
+		log.Printf("[%d] records received from page [%d]. Adding to DB", len(result.SH.Results), result.SH.Metadata.Page)
+		if err := db.Add(result.SH); err != nil {
 			log.Printf("Error inserting records: %s", err)
 		}
 	}

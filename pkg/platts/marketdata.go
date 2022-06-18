@@ -50,3 +50,8 @@ type MDCCount struct {
 	MDC         string
 	SymbolCount int
 }
+
+type Result struct {
+	SH  SymbolHistory
+	Err error
+}
