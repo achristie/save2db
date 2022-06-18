@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -82,7 +83,41 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, Page
 	}
 
 	return result, nil
+}
 
+// Concurrently get history. returning data to the channel
+func (c *Client) ConcurrentGetHistoryByMDC(Mdc string, StartTime time.Time, PageSize int, channel chan SymbolHistory) error {
+	// get first page
+	sh, err := c.GetHistoryByMDC(Mdc, StartTime, 1, PageSize)
+	if err != nil {
+		return err
+	}
+	channel <- sh
+
+	var wg sync.WaitGroup
+	// semaphore to prevent throttling
+	sem := make(chan struct{}, 2)
+
+	// loop through remaining pages and fetch concurrently
+	for i := 2; i <= sh.Metadata.TotalPages; i++ {
+		wg.Add(1)
+
+		go func(page int) {
+			defer wg.Done()
+			sem <- struct{}{}
+
+			sh, err := c.GetHistoryByMDC(Mdc, StartTime, page, PageSize)
+			if err != nil {
+				log.Printf("platts: Could not fetch Page [%d]: %s", page, err)
+			}
+			channel <- sh
+
+			<-sem
+		}(i)
+	}
+	wg.Wait()
+	close(channel)
+	return nil
 }
 
 func (c *Client) GetRefData(Page int, PageSize int) (ReferenceData, error) {
