@@ -39,6 +39,7 @@ func main() {
 }
 
 // Uses the `client` to fetch historical data for given MDC modified since `start`
+// Uses the concurrent get history method to fetch data in parallel
 // Store results in DB
 func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC string, start time.Time, pageSize int) {
 	ch := make(chan platts.SymbolHistory)
