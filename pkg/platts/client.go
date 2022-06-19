@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -43,7 +42,7 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
 	req.Close = true
 	u, _ := url.QueryUnescape(req.URL.String())
-	log.Printf("[%s] %s", req.Method, u)
+	// log.Printf("[%s] %s", req.Method, u)
 	res, err := c.c.Do(req)
 	if err != nil {
 		return nil, err
@@ -52,12 +51,12 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(res.Body)
-		return nil, fmt.Errorf("[%s] %s: %s", req.Method, res.Status, body)
+		return nil, fmt.Errorf("[%s] %s %s\n %s", req.Method, res.Status, u, body)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(target)
 	if err != nil {
-		return nil, fmt.Errorf("response error [%s] %s: %s", req.Method, req.URL.RequestURI(), err)
+		return nil, fmt.Errorf("response error [%s] %s: %s", req.Method, u, err)
 	}
 	return res, nil
 }

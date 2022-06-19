@@ -85,16 +85,16 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, Page
 	return result, nil
 }
 
-// Concurrently get history
-// SymbolHistory or Error is sent to channel
-// Consumer must decide how to handle err
-func (c *Client) ConcurrentGetHistoryByMDC(Mdc string, StartTime time.Time, PageSize int, channel chan Result) error {
+// Concurrently get history.
+// SymbolHistory or Error is sent to channel.
+// Consumer must decide how to handle err.
+func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, PageSize int, ch chan Result) error {
 	// get first page
 	sh, err := c.GetHistoryByMDC(Mdc, StartTime, 1, PageSize)
 	if err != nil {
 		return err
 	}
-	channel <- Result{sh, nil}
+	ch <- Result{sh, nil}
 
 	var wg sync.WaitGroup
 	// semaphore to prevent throttling
@@ -110,15 +110,16 @@ func (c *Client) ConcurrentGetHistoryByMDC(Mdc string, StartTime time.Time, Page
 
 			sh, err := c.GetHistoryByMDC(Mdc, StartTime, page, PageSize)
 			if err != nil {
-				channel <- Result{SymbolHistory{}, err}
+				ch <- Result{SymbolHistory{}, err}
+			} else {
+				ch <- Result{sh, nil}
 			}
-			channel <- Result{sh, nil}
 
 			<-sem
 		}(i)
 	}
 	wg.Wait()
-	close(channel)
+	close(ch)
 	return nil
 }
 

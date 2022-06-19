@@ -30,7 +30,7 @@ func main() {
 	// initial parameters
 	start, err := time.Parse("2006-01-02T15:04:05", *StartDate)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Could not parse time", err)
 	}
 
 	// Update market_data table with records modified since `start`
@@ -45,7 +45,7 @@ func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC stri
 	ch := make(chan platts.Result)
 
 	go func() {
-		err := client.ConcurrentGetHistoryByMDC(MDC, start, pageSize, ch)
+		err := client.GetHistoryByMDCConcurrent(MDC, start, pageSize, ch)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,10 +54,11 @@ func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC stri
 	for result := range ch {
 		if result.Err != nil {
 			log.Printf("Error retrieving data: %s", result.Err)
-		}
-		log.Printf("[%d] records received from page [%d]. Adding to DB", len(result.SH.Results), result.SH.Metadata.Page)
-		if err := db.Add(result.SH); err != nil {
-			log.Printf("Error inserting records: %s", err)
+		} else {
+			log.Printf("[%d] records received from page [%d]. Adding to DB", len(result.SH.Results), result.SH.Metadata.Page)
+			if err := db.Add(result.SH); err != nil {
+				log.Printf("Error inserting records: %s", err)
+			}
 		}
 	}
 }
