@@ -8,7 +8,7 @@ Each folder in CMD shows a different, but complimentary use case for the Platts 
 
 - [ Replacing a Datafeed with the Market Data API ](#replacing-a-datafeed-with-the-market-data-api)
 - [ Augmenting with Corrections ](#incorporating-corrections)
-- [ Getting Symbol Reference Data](#replacing-a-datafeed-with-api)
+- [ Getting Symbol Reference Data](#getting-reference-data)
 - [ Listing the MDCs I have access to](#replacing-a-datafeed-with-api)
 
 ## Replacing a Datafeed with the Market Data API
@@ -26,14 +26,14 @@ This example shows how to use the History API to get all assessments since `t` (
 
 ### Getting Started
 
-```
+```go
 go get github.com/mattn/go-sqlite3
 go run cmd/assessments/assessments.go -t 2022-06-10T00:00:00 -apikey {APIKEY} -username {USERNAME} -password {PASSWORD} -mdc {MDC}
 ```
 
 You will see logs in the console as API calls are made. Market data will be added to the `market_data` table in `database.db`.
 
-```
+```sql
 sqlite3 database.db
 SELECT * FROM market_data
 LIMIT 20;
@@ -51,6 +51,15 @@ This example compliments the above example by showing how to use the Corrections
 | t         | Modified Date. Get corrections since `t`. Defaults to `Now - 3Days`. Format is `2006-01-02T15:04:05` |
 | p         | Page size. Defaults to 1000                                                                          |
 
+### Getting Started
+
+```go
+go get github.com/mattn/go-sqlite3
+go run cmd/corrections/corrections.go -t 2022-06-10T00:00:00 -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
+```
+
+You will see logs in the console as API calls are made. Corrections will be reflected in the `market_data` table in `database.db`.
+
 ### Getting Reference Data
 
 This example compliments the above by getting the reference data associated with a Symbol.
@@ -61,7 +70,9 @@ This example compliments the above by getting the reference data associated with
 | username  | Your Platts Username. **Required**    |
 | password  | Your Platts Password. **Required**    |
 
-```
+### Getting Started
+
+```go
 go get github.com/mattn/go-sqlite3
 go run cmd/refdata/refdata.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
 ```
@@ -74,7 +85,7 @@ SELECT * FROM ref_data
 LIMIT 20;
 ```
 
-Join with market_data on `symbol`
+Join with `market_data` on `symbol`
 
 ```sql
 sqlite3 database.db
