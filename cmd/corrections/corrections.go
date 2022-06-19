@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/achristie/save2db"
+	save2db "github.com/achristie/save2db/internal"
 	platts "github.com/achristie/save2db/pkg/platts"
 
 	_ "github.com/mattn/go-sqlite3"

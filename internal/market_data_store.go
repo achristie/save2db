@@ -40,12 +40,6 @@ func createTable(db *sql.DB) {
 	log.Println("db: market_data table created succesfully")
 }
 
-// func createRefDataTable(db *sql.Db) {
-// 	ref_data_table := `CREATE TABLE IS NOT EXISTS ref_data (
-// 		"symbol" TEXT NOT NULL,
-// 		"`
-// }
-
 // Create our DB (if it does not exist)
 // and create `market_data` table
 func InitializeDb(dbFileName string) *MarketDataStore {

@@ -42,7 +42,6 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
 	req.Close = true
 	u, _ := url.QueryUnescape(req.URL.String())
-	// log.Printf("[%s] %s", req.Method, u)
 	res, err := c.c.Do(req)
 	if err != nil {
 		return nil, err

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/achristie/save2db"
+	save2db "github.com/achristie/save2db/internal"
 	platts "github.com/achristie/save2db/pkg/platts"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -45,6 +45,7 @@ func GetAssessments(client *platts.Client, db *save2db.MarketDataStore, MDC stri
 	ch := make(chan platts.Result)
 
 	go func() {
+		log.Printf("Fetching history for [%s] since %s", MDC, start.String())
 		err := client.GetHistoryByMDCConcurrent(MDC, start, pageSize, ch)
 		if err != nil {
 			log.Fatal(err)
