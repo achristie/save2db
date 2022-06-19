@@ -1,4 +1,4 @@
-package save2db
+package market_data
 
 import (
 	"database/sql"

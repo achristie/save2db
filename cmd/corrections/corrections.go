@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	save2db "github.com/achristie/save2db/internal"
+	MD "github.com/achristie/save2db/internal/market_data"
 	platts "github.com/achristie/save2db/pkg/platts"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -23,7 +23,7 @@ func main() {
 	client := platts.NewClient(APIKey, Username, Password)
 
 	// initialize DB and create market_data table if it does not exist
-	db := save2db.InitializeDb("database.db")
+	db := MD.InitializeDb("database.db")
 
 	// initial parameters
 	start, err := time.Parse("2006-01-02T15:04:05", *StartDate)
@@ -36,7 +36,7 @@ func main() {
 
 }
 
-func GetCorrections(client *platts.Client, db *save2db.MarketDataStore, start time.Time) {
+func GetCorrections(client *platts.Client, db *MD.MarketDataStore, start time.Time) {
 	page := 1
 	for {
 		sc, err := client.GetDeletes(start, page, 100)
