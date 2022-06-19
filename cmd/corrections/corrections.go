@@ -52,7 +52,8 @@ func GetCorrections(client *platts.Client, db *MD.MarketDataStore, start time.Ti
 		if result.Err != nil {
 			log.Printf("Error retrieving data: %s", result.Err)
 		} else {
-			log.Printf("%d records received from page [%d] in [%s]. Removing from DB", len(result.SC.Results), result.SC.Metadata.Page, result.SC.Metadata.QueryTime)
+			log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
+				len(result.SC.Results), result.SC.Metadata.Page, result.SC.Metadata.QueryTime, result.SC.Metadata.Count)
 			if err := db.Remove(result.SC); err != nil {
 				log.Printf("Error removing records: %s", err)
 			}

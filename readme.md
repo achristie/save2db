@@ -1,13 +1,37 @@
 # Platts API Examples
 
-## Getting Started
+## Table of Contents
+
+**THIS IS NOT PRODUCTION READY CODE**
+
+Each folder in CMD shows a different, but complimentary use case for the Platts Market Data API
+
+- [ Replacing a Datafeed with the Market Data API ](#replacing-a-datafeed-with-the-market-data-api)
+- [ Augmenting with Corrections ](#incorporating-corrections)
+- [ Getting Symbol Reference Data](#replacing-a-datafeed-with-api)
+- [ Listing the MDCs I have access to](#replacing-a-datafeed-with-api)
+
+## Replacing a Datafeed with the Market Data API
+
+This example shows how to use the History API to get all assessments since `t` (`modified_date`) and store the results in a local database. The idea is to invoke this program every `n` minutes in order to keep your database up to date.
+
+| Parameter | Description                                                                                          |
+| :-------- | :--------------------------------------------------------------------------------------------------- |
+| apikey    | Your MarketData API Key. **Required**                                                                |
+| username  | Your Platts Username. **Required**                                                                   |
+| password  | Your Platts Password. **Required**                                                                   |
+| t         | Modified Date. Get assessments since `t`. Defaults to `Now - 3Days`. Format is `2006-01-02T15:04:05` |
+| p         | Page size. Defaults to 1000                                                                          |
+| mdc       | Market Date Category. A grouping of symbols. _Optional_                                              |
+
+### Getting Started
 
 ```
 go get github.com/mattn/go-sqlite3
-go run cmd/cli/main.go -t 2022-06-10T16:00:00 -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
+go run cmd/assessments/assessments.go -t 2022-06-10T00:00:00 -apikey {APIKEY} -username {USERNAME} -password {PASSWORD} -mdc {MDC}
 ```
 
-Then check out the data in the sqlite database
+You will see logs in the console as API calls are made. Market data will be added to the `market_data` table in `database.db`.
 
 ```
 sqlite3 database.db
@@ -15,18 +39,46 @@ SELECT * FROM market_data
 LIMIT 20;
 ```
 
-## Explanation
+## Incorporating Corrections
 
-**This is not production ready code. This is only meant to show a typical use case.**
+This example compliments the above example by showing how to use the Corrections API to get Deletes/Backfills since `t` (`modified_date`) and update the local database accordingly. The idea is to invoke this program every `n` minutes in order to keep your database up to date.
 
-This example shows how to grab Market Data from the Platts API and store it in a database. By using `modified_date` in the API we are able to get all updates since a particular point in time. The idea is then to execute this function on an interval (~20 min) with a sliding `t` in order to keep your local database up to date. Additionally, we call the `corrections` endpoint in order to remove records which have been marked for deletion.
+| Parameter | Description                                                                                          |
+| :-------- | :--------------------------------------------------------------------------------------------------- |
+| apikey    | Your MarketData API Key. **Required**                                                                |
+| username  | Your Platts Username. **Required**                                                                   |
+| password  | Your Platts Password. **Required**                                                                   |
+| t         | Modified Date. Get corrections since `t`. Defaults to `Now - 3Days`. Format is `2006-01-02T15:04:05` |
+| p         | Page size. Defaults to 1000                                                                          |
 
-Rough outline of what is included here:
+### Getting Reference Data
 
-- Get an Access Token
-- Get a list of MDC (Market Data Category) the User has access to
-- For each MDC retrieve pricing data since time `t`
-- Page through results (if necessary)
-- Store results in database
-- Get corrections (deletes) since time `t` and remove from database
-- (not shown) `t` should slide so that you're updating `t` every invocation based on the time of your previous invocation
+This example compliments the above by getting the reference data associated with a Symbol.
+
+| Parameter | Description                           |
+| :-------- | :------------------------------------ |
+| apikey    | Your MarketData API Key. **Required** |
+| username  | Your Platts Username. **Required**    |
+| password  | Your Platts Password. **Required**    |
+
+```
+go get github.com/mattn/go-sqlite3
+go run cmd/refdata/refdata.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
+```
+
+You will see logs in the console as API calls are made. Reference data will be added to the `ref_data` table in `database.db`.
+
+```sql
+sqlite3 database.db
+SELECT * FROM ref_data
+LIMIT 20;
+```
+
+Join with market_data on `symbol`
+
+```sql
+sqlite3 database.db
+SELECT * FROM market_data md
+INNER JOIN ref_data rd ON md.symbol = rd.symbol
+LIMIT 10;
+```
