@@ -17,6 +17,7 @@ func main() {
 	Username := flag.String("username", "NULL", "Username to get a token")
 	Password := flag.String("password", "NULL", "Password associated with Username")
 	StartDate := flag.String("t", time.Now().UTC().AddDate(0, 0, -3).Format("2006-01-02T15:04:05"), "Get updates since date. Format 2006-01-02T15:04:05")
+	PageSize := flag.Int("p", 1000, "The page size to use for API Calls. Max is 10,000")
 	flag.Parse()
 
 	// create a platts api client
@@ -32,28 +33,29 @@ func main() {
 	}
 
 	// Update market_data table with records marked for deletion since `start`
-	GetCorrections(client, db, start)
+	GetCorrections(client, db, start, *PageSize)
 
 }
 
-func GetCorrections(client *platts.Client, db *MD.MarketDataStore, start time.Time) {
-	page := 1
-	for {
-		sc, err := client.GetDeletes(start, page, 100)
+func GetCorrections(client *platts.Client, db *MD.MarketDataStore, start time.Time, pageSize int) {
+	ch := make(chan platts.DeleteResult)
+
+	go func() {
+		log.Printf("Fetching corrections since %s", start.String())
+		err := client.GetDeletesConcurrent(start, pageSize, ch)
 		if err != nil {
-			log.Printf("error getting corrections: %s", err)
+			log.Fatal(err)
 		}
-		if err := db.Remove(sc); err != nil {
-			log.Printf("error deleting records: %s", err)
-		}
-		log.Printf("Page [%d] - Fetched up to [%d] records in [%s] and removed from DB", page, sc.Metadata.PageSize, sc.Metadata.QueryTime)
+	}()
 
-		if sc.Metadata.TotalPages == page || sc.Metadata.TotalPages == 0 {
-			break
+	for result := range ch {
+		if result.Err != nil {
+			log.Printf("Error retrieving data: %s", result.Err)
+		} else {
+			log.Printf("%d records received from page [%d] in [%s]. Removing from DB", len(result.SC.Results), result.SC.Metadata.Page, result.SC.Metadata.QueryTime)
+			if err := db.Remove(result.SC); err != nil {
+				log.Printf("Error removing records: %s", err)
+			}
 		}
-
-		// avoid getting throttled by the API
-		time.Sleep(1 * time.Second)
-		page += 1
 	}
 }

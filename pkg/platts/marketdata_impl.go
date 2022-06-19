@@ -62,7 +62,35 @@ func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (Symbol
 	}
 
 	return result, nil
+}
 
+func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan DeleteResult) error {
+	sc, err := c.GetDeletes(StartTime, 1, PageSize)
+	if err != nil {
+		return err
+	}
+	ch <- DeleteResult{sc, nil}
+
+	sem := make(chan struct{}, 1)
+	var wg sync.WaitGroup
+	for i := 2; i <= sc.Metadata.TotalPages; i++ {
+		wg.Add(1)
+		go func(page int) {
+			defer wg.Done()
+			sem <- struct{}{}
+			sc, err := c.GetDeletes(StartTime, page, PageSize)
+			if err != nil {
+				ch <- DeleteResult{SymbolCorrection{}, err}
+			} else {
+				ch <- DeleteResult{sc, nil}
+			}
+			<-sem
+		}(i)
+	}
+
+	wg.Wait()
+	close(ch)
+	return nil
 }
 
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {

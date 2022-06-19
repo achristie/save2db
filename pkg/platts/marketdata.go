@@ -55,3 +55,8 @@ type Result struct {
 	SH  SymbolHistory
 	Err error
 }
+
+type DeleteResult struct {
+	SC  SymbolCorrection
+	Err error
+}
