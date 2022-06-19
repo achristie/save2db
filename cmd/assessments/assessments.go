@@ -56,7 +56,7 @@ func GetAssessments(client *platts.Client, db *MD.MarketDataStore, MDC string, s
 		if result.Err != nil {
 			log.Printf("Error retrieving data: %s", result.Err)
 		} else {
-			log.Printf("[%d] records received from page [%d]. Adding to DB", len(result.SH.Results), result.SH.Metadata.Page)
+			log.Printf("[%d] records received from page [%d] (%d total records). Adding to DB", len(result.SH.Results), result.SH.Metadata.Page, result.SH.Metadata.Count)
 			if err := db.Add(result.SH); err != nil {
 				log.Printf("Error inserting records: %s", err)
 			}

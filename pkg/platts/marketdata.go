@@ -7,8 +7,16 @@ type Facets struct {
 }
 
 type ReferenceData struct {
-	Metadata Metadata `json:"metadata"`
-	Facets   Facets   `json:"facets"`
+	Metadata RefMetadata `json:"metadata"`
+	Facets   Facets      `json:"facets"`
+	Results  []struct {
+		Symbol         string `json:"symbol"`
+		Description    string `json:"description"`
+		Commodity      string `json:"commodity"`
+		UOM            string `json:"uom"`
+		Active         string `json:"active"`
+		DeliveryRegion string `json:"delivery_region"`
+	} `json:"results"`
 }
 
 type Metadata struct {
@@ -17,6 +25,14 @@ type Metadata struct {
 	Page       int    `json:"page"`
 	TotalPages int    `json:"totalPages"`
 	QueryTime  string `json:"queryTime"`
+}
+
+type RefMetadata struct {
+	Count      int    `json:"count"`
+	PageSize   int    `json:"page_size"`
+	Page       int    `json:"page"`
+	TotalPages int    `json:"total_pages"`
+	QueryTime  string `json:"query_time"`
 }
 
 type SymbolCorrection struct {

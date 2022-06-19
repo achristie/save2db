@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
+
+	"github.com/achristie/save2db/pkg/platts"
 )
 
 type RefDataStore struct {
@@ -13,17 +15,18 @@ type RefDataStore struct {
 func createTable(db *sql.DB) {
 	ref_data_table := `CREATE TABLE IF NOT EXISTS ref_data (
 		"symbol" TEXT NOT NULL,
-		"assessment_frequency" TEXT NOT NULL,
-		"commodity" TEXT NOT NULL,
-		"contract_type" TEXT NOT NULL,
-		"description" TEXT NOT NULL, "publication_frequency_code" TEXT NOT NULL,
-		"quotation_style" TEXT NOT NULL,
-		"delivery_region" TEXT NOT NULL,
-		"delivery_region_basis" TEXT NOT NULL,
-		"settlement_type" TEXT NOT NULL,
-		"active" TEXT NOT NULL,
-		"timestamp" TEXT NOT NULL,
-		"uom" TEXT NOT NULL
+		"assessment_frequency" TEXT,
+		"commodity" TEXT,
+		"contract_type" TEXT,
+		"description" TEXT, 
+		"publication_frequency_code" TEXT ,
+		"quotation_style" TEXT,
+		"delivery_region" TEXT,
+		"delivery_region_basis" TEXT,
+		"settlement_type" TEXT,
+		"active" TEXT,
+		"timestamp" TEXT,
+		"uom" TEXT 
 	);"`
 
 	query, err := db.Prepare(ref_data_table)
@@ -51,4 +54,28 @@ func InitializeDb(dbFileName string) *RefDataStore {
 	createTable(db)
 
 	return &RefDataStore{database: db}
+}
+
+func (r *RefDataStore) Add(data platts.ReferenceData) error {
+	stmt := `INSERT or REPLACE INTO ref_data(symbol, description, commodity, uom, active, delivery_region)
+	 VALUES(?, ?, ?, ?, ?, ?)`
+	query, err := r.database.Prepare(stmt)
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	tx, err := r.database.Begin()
+	if err != nil {
+		return err
+	}
+
+	for _, r := range data.Results {
+		_, err := tx.Stmt(query).Exec(r.Symbol, r.Description, r.Commodity, r.UOM, r.Active, r.DeliveryRegion)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit()
 }

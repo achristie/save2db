@@ -6,6 +6,7 @@ import (
 
 	RD "github.com/achristie/save2db/internal/ref_data"
 	"github.com/achristie/save2db/pkg/platts"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -20,9 +21,20 @@ func main() {
 
 	db := RD.InitializeDb("database.db")
 
-	rd, err := client.GetRefData(1, *PageSize)
-	if err != nil {
-		log.Println(err)
+	page := 1
+	for {
+		rd, err := client.GetRefData(page, *PageSize)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Printf("[%d] records received from page [%d] (%d total records). Adding to DB", len(rd.Results), rd.Metadata.Page, rd.Metadata.Count)
+		if err := db.Add(rd); err != nil {
+			log.Print(err)
+		}
+		if rd.Metadata.TotalPages == page || rd.Metadata.TotalPages == 0 {
+			break
+		}
+		page++
 	}
 
 }
