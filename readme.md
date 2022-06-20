@@ -4,7 +4,7 @@
 
 **THIS IS NOT PRODUCTION READY CODE**
 
-Each folder in CMD shows a different, but complimentary use case for the Platts Market Data API
+Each folder in CMD shows a different, but complimentary, use case for the Platts Market Data API
 
 - [ Replacing a Datafeed with the Market Data API ](#replacing-a-datafeed-with-the-market-data-api)
 - [ Augmenting with Corrections ](#incorporating-corrections)
@@ -60,7 +60,7 @@ go run cmd/corrections/corrections.go -t 2022-06-10T00:00:00 -apikey {APIKEY} -u
 
 You will see logs in the console as API calls are made. Corrections will be reflected in the `market_data` table in `database.db`.
 
-### Getting Reference Data
+## Getting Reference Data
 
 This example compliments the above by getting the reference data associated with a Symbol.
 

@@ -43,7 +43,8 @@ func (c *Client) GetSubscribedMDC() ([]MDCCount, error) {
 
 }
 
-// Only need to get DEL because UPD is handled by modified date endpoint
+// Call Corrections endpoint to get Deletes and Backfills.
+// Updates are handled by the History endpoint.
 func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (SymbolCorrection, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("correctionType:\"DEL\" AND modDate >= %q", StartTime.Format("2006-01-02T15:04:05")))
@@ -64,6 +65,10 @@ func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (Symbol
 	return result, nil
 }
 
+// Concurrent version of GetDeletes.
+// Automatically pages through all results.
+// Correction or Error is sent to channel.
+// Errors must be handled by consumer.
 func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan DeleteResult) error {
 	sc, err := c.GetDeletes(StartTime, 1, PageSize)
 	if err != nil {
@@ -93,6 +98,7 @@ func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan
 	return nil
 }
 
+// Call History endpoint to get historical assessments.
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("mdc IN (%q) AND modDate >= %q", Mdc, StartTime.Format("2006-01-02T15:04:05")))
@@ -151,6 +157,7 @@ func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, Page
 	return nil
 }
 
+// Call Search endpoint to get reference data.
 func (c *Client) GetRefData(Page int, PageSize int) (ReferenceData, error) {
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
