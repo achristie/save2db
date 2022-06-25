@@ -49,7 +49,7 @@ This example compliments the above example by showing how to use the Corrections
 | username  | Your Platts Username. **Required**                                                                   |
 | password  | Your Platts Password. **Required**                                                                   |
 | t         | Modified Date. Get corrections since `t`. Defaults to `Now - 3Days`. Format is `2006-01-02T15:04:05` |
-| p         | Page size. Defaults to 1000                                                                          |
+| p         | Page size. Defaults to 1,000                                                                         |
 
 ### Getting Started
 
@@ -69,6 +69,7 @@ This example compliments the above by getting the reference data associated with
 | apikey    | Your MarketData API Key. **Required** |
 | username  | Your Platts Username. **Required**    |
 | password  | Your Platts Password. **Required**    |
+| p         | Page size. Defaults to 1,000          |
 
 ### Getting Started
 
@@ -77,7 +78,14 @@ go get github.com/mattn/go-sqlite3
 go run cmd/refdata/refdata.go -apikey {APIKEY} -username {USERNAME} -password {PASSWORD}
 ```
 
-You will see logs in the console as API calls are made. Reference data will be added to the `ref_data` table in `database.db`.
+You will see logs in the console as API calls are made. Data will be added to `database.db`. Three tables are created:
+| Table Name | Description |
+| :-------- | :------------------------------------ |
+| ref_data | One row per `symbol`
+| sym_bate | One row per `symbol`, `bate`
+| sym_mdc | One row per `symbol`, `mdc` |
+
+Basic usage
 
 ```sql
 sqlite3 database.db
