@@ -48,7 +48,7 @@ func (c *Client) GetSubscribedMDC() ([]MDCCount, error) {
 func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (SymbolCorrection, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("correctionType:\"DEL\" AND modDate >= %q", StartTime.Format("2006-01-02T15:04:05")))
-	params.Add("sort", "modDate: asc") // important for paging properly
+	params.Add("sort", "modDate: asc, symbol: asc, assessDate: asc") // important for paging properly
 	params.Add("pagesize", strconv.Itoa(PageSize))
 	params.Add("page", strconv.Itoa(Page))
 
@@ -102,7 +102,7 @@ func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, PageSize int) (SymbolHistory, error) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("mdc IN (%q) AND modDate >= %q", Mdc, StartTime.Format("2006-01-02T15:04:05")))
-	params.Add("sort", "modDate: asc") // important for paging properly
+	params.Add("sort", "modDate: asc, symbol: asc, assessDate: asc") // important for paging properly
 	params.Add("pagesize", strconv.Itoa(PageSize))
 	params.Add("page", strconv.Itoa(Page))
 

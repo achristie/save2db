@@ -26,6 +26,7 @@ func main() {
 		rd, err := client.GetRefData(page, *PageSize)
 		if err != nil {
 			log.Println(err)
+			break
 		}
 		log.Printf("[%d] records received from page [%d] (%d total records). Adding to DB", len(rd.Results), rd.Metadata.Page, rd.Metadata.Count)
 		if err := db.Add(rd); err != nil {

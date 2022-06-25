@@ -10,12 +10,28 @@ type ReferenceData struct {
 	Metadata RefMetadata `json:"metadata"`
 	Facets   Facets      `json:"facets"`
 	Results  []struct {
-		Symbol         string `json:"symbol"`
-		Description    string `json:"description"`
-		Commodity      string `json:"commodity"`
-		UOM            string `json:"uom"`
-		Active         string `json:"active"`
-		DeliveryRegion string `json:"delivery_region"`
+		Symbol                   string   `json:"symbol"`
+		Description              string   `json:"description"`
+		Commodity                string   `json:"commodity"`
+		UOM                      string   `json:"uom"`
+		Active                   string   `json:"active"`
+		DeliveryRegion           string   `json:"delivery_region"`
+		DeliveryRegionBasis      string   `json:"delivery_region_basis"`
+		ContractType             string   `json:"contract_type"`
+		PublicationFrequencyCode string   `json:"publication_frequency_code"`
+		ShippingTerms            string   `json:"shipping_terms"`
+		DayOfPublication         string   `json:"day_of_publication"`
+		StandardLotSize          float32  `json:"standard_lot_size"`
+		StandardLotUnits         string   `json:"standard_lot_units"`
+		QuotationStyle           string   `json:"quotation_style"`
+		Bate                     []string `json:"bate_code"`
+		CommodityGrade           string   `json:"commodity_grade"`
+		Currency                 string   `json:"currency"`
+		AssessmentFrequency      string   `json:"assessment_frequency"`
+		Timestamp                string   `json:"timestamp"`
+		SettlementType           string   `json:"settlement_type"`
+		MDC                      []string `json:"mdc"`
+		MDCDescription           []string `json:"mdc_description"`
 	} `json:"results"`
 }
 
