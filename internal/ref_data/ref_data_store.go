@@ -32,7 +32,8 @@ const (
 		"shipping_terms" TEXT,
 		"standard_lot_size" INTEGER,
 		"commodity_grade" INTEGER,
-		"standard_lot_units" TEXT
+		"standard_lot_units" TEXT,
+		"decimal_places" INTEGER
 	);"`
 	ref_data_insert = `INSERT or REPLACE INTO ref_data(
 		symbol,
@@ -53,9 +54,10 @@ const (
 		shipping_terms, 
 		standard_lot_size, 
 		commodity_grade, 
-		standard_lot_units
+		standard_lot_units,
+		decimal_places
 	)
-	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	sym_bate_table = `CREATE TABLE IF NOT EXISTS sym_bate (
 			"symbol" TEXT NOT NULL,
 			"bate" TEXT NOT NULL	
@@ -137,7 +139,7 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 			r.ContractType, r.Description, r.PublicationFrequencyCode, r.Currency,
 			r.QuotationStyle, r.DeliveryRegion, r.DeliveryRegionBasis, r.SettlementType,
 			r.Active, r.Timestamp, r.UOM, r.DayOfPublication, r.ShippingTerms,
-			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits)
+			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits, r.DecimalPlaces)
 		_, err2 := tx.Stmt(queries["bate_delete"]).Exec(r.Symbol)
 		_, err3 := tx.Stmt(queries["mdc_delete"]).Exec(r.Symbol)
 		for _, b := range r.Bate {

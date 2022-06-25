@@ -32,6 +32,7 @@ type ReferenceData struct {
 		SettlementType           string   `json:"settlement_type"`
 		MDC                      []string `json:"mdc"`
 		MDCDescription           []string `json:"mdc_description"`
+		DecimalPlaces            int      `json:"decimal_places"`
 	} `json:"results"`
 }
 

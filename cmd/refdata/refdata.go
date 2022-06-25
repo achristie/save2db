@@ -32,6 +32,7 @@ func main() {
 		log.Printf("[%d] records received from page [%d] (%d total records). Adding to DB", len(rd.Results), rd.Metadata.Page, rd.Metadata.Count)
 		if err := db.Add(rd); err != nil {
 			log.Print(err)
+			break
 		}
 		if rd.Metadata.TotalPages == page || rd.Metadata.TotalPages == 0 {
 			break
