@@ -34,27 +34,57 @@ const (
 		"commodity_grade" INTEGER,
 		"standard_lot_units" TEXT
 	);"`
+	ref_data_insert = `INSERT or REPLACE INTO ref_data(
+		symbol,
+		assessment_frequency,
+		commodity,
+		contract_type,
+		description,
+		publication_frequency_code,
+		currency,
+		quotation_style,
+		delivery_region,
+		delivery_region_basis, 
+		settlement_type,
+		active, 
+		timestamp, 
+		uom, 
+		day_of_publication, 
+		shipping_terms, 
+		standard_lot_size, 
+		commodity_grade, 
+		standard_lot_units
+	)
+	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	sym_bate_table = `CREATE TABLE IF NOT EXISTS sym_bate (
 			"symbol" TEXT NOT NULL,
 			"bate" TEXT NOT NULL	
 		);"`
+	bate_insert   = `INSERT OR REPLACE INTO sym_bate(symbol, bate) VALUES(?, ?)`
+	bate_delete   = `DELETE FROM sym_bate WHERE symbol=?`
 	sym_mdc_table = `CREATE TABLE IF NOT EXISTS sym_mdc (
 		"symbol" TEXT NOT NULL,
 		"mdc" TEXT NOT NULL,
 		"mdc_description" TEXT NOT NULL
 	);"`
+	mdc_insert = `INSERT OR REPLACE INTO sym_mdc(symbol, mdc, mdc_description) VALUES(?, ?, ?)`
+	mdc_delete = `DELETE FROM sym_mdc WHERE symbol=?`
 )
 
 func createTable(db *sql.DB) {
 	creates := map[string]string{"ref_data": ref_data_table, "sym_bate": sym_bate_table, "sym_mdc": sym_mdc_table}
 
 	for k, v := range creates {
-		query, err := db.Prepare(v)
-		if err != nil {
-			log.Fatal(err)
-		}
-		query.Exec()
-		log.Printf("db: %s created succesfully", k)
+		func() {
+			query, err := db.Prepare(v)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer query.Close()
+
+			query.Exec()
+			log.Printf("db: %s created succesfully", k)
+		}()
 
 	}
 
@@ -80,34 +110,22 @@ func InitializeDb(dbFileName string) *RefDataStore {
 }
 
 func (r *RefDataStore) Add(data platts.ReferenceData) error {
-	stmt := `INSERT or REPLACE INTO ref_data(symbol, description, commodity, uom, active, delivery_region)
-	 VALUES(?, ?, ?, ?, ?, ?)`
-	query, err := r.database.Prepare(stmt)
-	if err != nil {
-		return err
-	}
-	defer query.Close()
+	stmts := map[string]string{"ref_data_insert": ref_data_insert,
+		"bate_insert": bate_insert, "bate_delete": bate_delete,
+		"mdc_insert": mdc_insert, "mdc_delete": mdc_delete}
+	queries := map[string]*sql.Stmt{}
 
-	bate_stmt := `INSERT OR REPLACE INTO sym_bate(symbol, bate) VALUES(?, ?)`
-	b_query, err := r.database.Prepare(bate_stmt)
-	if err != nil {
-		return err
+	for k, v := range stmts {
+		query, err := r.database.Prepare(v)
+		if err != nil {
+			return err
+		}
+		queries[k] = query
 	}
-	defer b_query.Close()
-
-	del_stmt := `DELETE FROM sym_bate WHERE symbol=?`
-	d_query, err := r.database.Prepare(del_stmt)
-	if err != nil {
-		return err
-	}
-	defer d_query.Close()
-
-	mdc_stmt := `INSERT OR REPLACE INTO sym_mdc(symbol, mdc, mdc_description) VALUES(?, ?, ?)`
-	m_query, err := r.database.Prepare(mdc_stmt)
-	if err != nil {
-		return err
-	}
-	defer b_query.Close()
+	// defer queries["ref_data_insert"].Close()
+	// defer queries["bate_insert"].Close()
+	// defer queries["bate_delet"].Close()
+	// defer queries["mdc_insert"].Close()
 
 	tx, err := r.database.Begin()
 	if err != nil {
@@ -115,23 +133,28 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 	}
 
 	for _, r := range data.Results {
-		_, err := tx.Stmt(query).Exec(r.Symbol, r.Description, r.Commodity, r.UOM, r.Active, r.DeliveryRegion)
-		_, err2 := tx.Stmt(d_query).Exec(r.Symbol)
+		_, err := tx.Stmt(queries["ref_data_insert"]).Exec(r.Symbol, r.AssessmentFrequency, r.Commodity,
+			r.ContractType, r.Description, r.PublicationFrequencyCode, r.Currency,
+			r.QuotationStyle, r.DeliveryRegion, r.DeliveryRegionBasis, r.SettlementType,
+			r.Active, r.Timestamp, r.UOM, r.DayOfPublication, r.ShippingTerms,
+			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits)
+		_, err2 := tx.Stmt(queries["bate_delete"]).Exec(r.Symbol)
+		_, err3 := tx.Stmt(queries["mdc_delete"]).Exec(r.Symbol)
 		for _, b := range r.Bate {
-			_, err := tx.Stmt(b_query).Exec(r.Symbol, b)
+			_, err := tx.Stmt(queries["bate_insert"]).Exec(r.Symbol, b)
 			if err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
 		for i, m := range r.MDC {
-			_, err := tx.Stmt(m_query).Exec(r.Symbol, m, r.MDCDescription[i])
+			_, err := tx.Stmt(queries["mdc_insert"]).Exec(r.Symbol, m, r.MDCDescription[i])
 			if err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-		if err != nil || err2 != nil {
+		if err != nil || err2 != nil || err3 != nil {
 			tx.Rollback()
 			return err
 		}

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	RD "github.com/achristie/save2db/internal/ref_data"
 	"github.com/achristie/save2db/pkg/platts"
@@ -36,6 +37,7 @@ func main() {
 			break
 		}
 		page++
+		time.Sleep(500 * time.Millisecond)
 	}
 
 }
