@@ -15,7 +15,7 @@ func main() {
 	APIKey := flag.String("apikey", "NULL", "API Key to call API with")
 	Username := flag.String("username", "NULL", "Username to get a token")
 	Password := flag.String("password", "NULL", "Password associated with Username")
-	PageSize := flag.Int("p", 1000, "The page size to use for API Calls. Max is 10,000")
+	PageSize := flag.Int("p", 1000, "The page size to use for API Calls. Max is 1,000")
 	flag.Parse()
 
 	client := platts.NewClient(APIKey, Username, Password)
