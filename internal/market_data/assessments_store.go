@@ -3,12 +3,11 @@ package market_data
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	platts "github.com/achristie/save2db/pkg/platts"
 )
 
-type MarketDataStore struct {
+type AssessmentsStore struct {
 	database *sql.DB
 }
 
@@ -22,8 +21,8 @@ type dbClass struct {
 }
 
 // creating the market_data table
-func createTable(db *sql.DB) {
-	market_data_table := `CREATE TABLE IF NOT EXISTS market_data (
+func createAssessmentTables(db *sql.DB) {
+	assessments_table := `CREATE TABLE IF NOT EXISTS assessments (
 		"symbol" TEXT NOT NULL,
 		"bate" TEXT NOT NULL,
 		"price" NUM NOT NULL,
@@ -32,35 +31,25 @@ func createTable(db *sql.DB) {
 		"is_corrected" string NOT NULL
 	);`
 	// PRIMARY KEY (symbol, bate, assessed_date) );`
-	query, err := db.Prepare(market_data_table)
+	query, err := db.Prepare(assessments_table)
 	if err != nil {
 		log.Fatal(err)
 	}
 	query.Exec()
-	log.Println("db: market_data table created succesfully")
+	log.Println("db: assessments table created succesfully")
 }
 
 // Create our DB (if it does not exist)
 // and create `market_data` table
-func InitializeDb(dbFileName string) *MarketDataStore {
-	file, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
+func NewAssessmentsStore(db *sql.DB) *AssessmentsStore {
 
-	if err != nil {
-		log.Fatalf("could not open %s %v", dbFileName, err)
-	}
+	createAssessmentTables(db)
 
-	db, err := sql.Open("sqlite3", file.Name())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	createTable(db)
-
-	return &MarketDataStore{database: db}
+	return &AssessmentsStore{database: db}
 }
 
 // Remove a Symbol-Bate-Assessed Date from the DB
-func (m *MarketDataStore) Remove(data platts.SymbolCorrection) error {
+func (m *AssessmentsStore) Remove(data platts.SymbolCorrection) error {
 	var records []dbClass
 	for _, v := range data.Results {
 		for _, v2 := range v.Data {
@@ -75,8 +64,8 @@ func (m *MarketDataStore) Remove(data platts.SymbolCorrection) error {
 }
 
 // del is the internal implementation for Remove
-func (m *MarketDataStore) del(records []dbClass) error {
-	del := `DELETE FROM market_data where symbol = ? and bate = ? and assessed_date = ?`
+func (m *AssessmentsStore) del(records []dbClass) error {
+	del := `DELETE FROM assessments where symbol = ? and bate = ? and assessed_date = ?`
 	query, err := m.database.Prepare(del)
 	if err != nil {
 		return err
@@ -100,7 +89,7 @@ func (m *MarketDataStore) del(records []dbClass) error {
 }
 
 // Add symbol history to the database
-func (m *MarketDataStore) Add(data platts.SymbolHistory) error {
+func (m *AssessmentsStore) Add(data platts.SymbolHistory) error {
 	var records []dbClass
 	// change data structure for ease of INSERT
 	for _, v := range data.Results {
@@ -119,8 +108,8 @@ func (m *MarketDataStore) Add(data platts.SymbolHistory) error {
 }
 
 // insert is the internal implementation for Add
-func (m *MarketDataStore) insert(records []dbClass) error {
-	ins := `INSERT or REPLACE INTO market_data(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
+func (m *AssessmentsStore) insert(records []dbClass) error {
+	ins := `INSERT or REPLACE INTO assessments(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := m.database.Prepare(ins)
 	if err != nil {
 		return err

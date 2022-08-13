@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	RD "github.com/achristie/save2db/internal/ref_data"
+	MD "github.com/achristie/save2db/internal/market_data"
 	"github.com/achristie/save2db/pkg/platts"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -20,7 +20,8 @@ func main() {
 
 	client := platts.NewClient(APIKey, Username, Password)
 
-	db := RD.InitializeDb("database.db")
+	db := MD.NewDb("database.db")
+	rds := MD.NewRefDataStore(db)
 
 	page := 1
 	for {
@@ -29,8 +30,8 @@ func main() {
 			log.Println(err)
 			break
 		}
-		log.Printf("[%d] records received from page [%d] (%d total records). Adding to DB", len(rd.Results), rd.Metadata.Page, rd.Metadata.Count)
-		if err := db.Add(rd); err != nil {
+		log.Printf("[%d] records received from page [%d]  (%d total records) in [%s]ms. Adding to DB", len(rd.Results), rd.Metadata.Page, rd.Metadata.Count, rd.Metadata.QueryTime)
+		if err := rds.Add(rd); err != nil {
 			log.Print(err)
 			break
 		}

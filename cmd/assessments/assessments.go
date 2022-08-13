@@ -25,7 +25,8 @@ func main() {
 	client := platts.NewClient(APIKey, Username, Password)
 
 	// initialize DB and create market_data table if it does not exist
-	db := MD.InitializeDb("database.db")
+	db := MD.NewDb("database.db")
+	as := MD.NewAssessmentsStore(db)
 
 	// initial parameters
 	start, err := time.Parse("2006-01-02T15:04:05", *StartDate)
@@ -34,14 +35,14 @@ func main() {
 	}
 
 	// Update market_data table with records modified since `start`
-	GetAssessments(client, db, *MDC, start, *PageSize)
+	GetAssessments(client, as, *MDC, start, *PageSize)
 
 }
 
 // Uses the `client` to fetch historical data for given MDC modified since `start`
 // Uses the concurrent get history method to fetch data in parallel
 // Store results in DB
-func GetAssessments(client *platts.Client, db *MD.MarketDataStore, MDC string, start time.Time, pageSize int) {
+func GetAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, start time.Time, pageSize int) {
 	ch := make(chan platts.Result)
 
 	go func() {

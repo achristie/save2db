@@ -1,9 +1,8 @@
-package ref_data
+package market_data
 
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/achristie/save2db/pkg/platts"
 )
@@ -73,7 +72,7 @@ const (
 	mdc_delete = `DELETE FROM sym_mdc WHERE symbol=?`
 )
 
-func createTable(db *sql.DB) {
+func createRefDataTables(db *sql.DB) {
 	creates := map[string]string{"ref_data": ref_data_table, "sym_bate": sym_bate_table, "sym_mdc": sym_mdc_table}
 
 	for k, v := range creates {
@@ -94,19 +93,8 @@ func createTable(db *sql.DB) {
 
 // Create our DB (if it does not exist)
 // and create `ref_data` table
-func InitializeDb(dbFileName string) *RefDataStore {
-	file, err := os.OpenFile(dbFileName, os.O_RDWR|os.O_CREATE, 0666)
-
-	if err != nil {
-		log.Fatalf("could not open %s %v", dbFileName, err)
-	}
-
-	db, err := sql.Open("sqlite3", file.Name())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	createTable(db)
+func NewRefDataStore(db *sql.DB) *RefDataStore {
+	createRefDataTables(db)
 
 	return &RefDataStore{database: db}
 }
@@ -115,6 +103,8 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 	stmts := map[string]string{"ref_data_insert": ref_data_insert,
 		"bate_insert": bate_insert, "bate_delete": bate_delete,
 		"mdc_insert": mdc_insert, "mdc_delete": mdc_delete}
+
+	// stmts := map[string]string{"ref_data_insert": ref_data_insert}
 	queries := map[string]*sql.Stmt{}
 
 	for k, v := range stmts {
@@ -124,10 +114,10 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 		}
 		queries[k] = query
 	}
-	// defer queries["ref_data_insert"].Close()
-	// defer queries["bate_insert"].Close()
-	// defer queries["bate_delet"].Close()
-	// defer queries["mdc_insert"].Close()
+	defer queries["ref_data_insert"].Close()
+	defer queries["bate_insert"].Close()
+	defer queries["bate_delete"].Close()
+	defer queries["mdc_insert"].Close()
 
 	tx, err := r.database.Begin()
 	if err != nil {
@@ -156,6 +146,10 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 				return err
 			}
 		}
+		// if err != nil {
+		// 	tx.Rollback()
+		// 	return err
+		// }
 		if err != nil || err2 != nil || err3 != nil {
 			tx.Rollback()
 			return err
