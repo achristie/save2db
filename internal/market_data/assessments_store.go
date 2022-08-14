@@ -20,7 +20,7 @@ type dbClass struct {
 	isCorrected  string
 }
 
-// creating the market_data table
+// creating the assessments table
 func createAssessmentTables(db *sql.DB) {
 	assessments_table := `CREATE TABLE IF NOT EXISTS assessments (
 		"symbol" TEXT NOT NULL,
@@ -35,6 +35,8 @@ func createAssessmentTables(db *sql.DB) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer query.Close()
+
 	query.Exec()
 	log.Println("db: assessments table created succesfully")
 }

@@ -2,46 +2,11 @@ package platts
 
 import (
 	"fmt"
-	"log"
 	"net/url"
-	"sort"
 	"strconv"
 	"sync"
 	"time"
 )
-
-func (c *Client) GetSubscribedMDC() ([]MDCCount, error) {
-	params := url.Values{}
-	params.Add("subscribed_only", "true")
-	params.Add("Facet.Field", "mdc")
-	params.Add("Field", "symbol")
-	params.Add("PageSize", "1")
-
-	req, err := c.newRequest("market-data/reference-data/v3/search", params)
-
-	if err != nil {
-		return []MDCCount{}, err
-	}
-	var result ReferenceData
-
-	if _, err = c.do(req, &result); err != nil {
-		return []MDCCount{}, err
-	}
-
-	var s []MDCCount
-	for k, v := range result.Facets.FacetCounts.Mdc {
-		count, err := strconv.Atoi(v)
-		if err != nil {
-			log.Printf("platts: Could not convert count to int for MDC: [%s], %s", k, err)
-		}
-		s = append(s, MDCCount{MDC: k, SymbolCount: count})
-	}
-	sort.SliceStable(s, func(i, j int) bool {
-		return s[i].SymbolCount < s[j].SymbolCount
-	})
-	return s, nil
-
-}
 
 // Call Corrections endpoint to get Deletes and Backfills.
 // Updates are handled by the History endpoint.
