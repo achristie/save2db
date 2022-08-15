@@ -13,7 +13,7 @@ func NewDb(FileName string) *sql.DB {
 		log.Fatalf("could not open %s %v", FileName, err)
 	}
 
-	db, err := sql.Open("sqlite3", file.Name())
+	db, err := sql.Open("sqlite", file.Name())
 	if err != nil {
 		log.Fatal(err)
 	}

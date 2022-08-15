@@ -7,7 +7,9 @@ import (
 
 	MD "github.com/achristie/save2db/internal/market_data"
 	"github.com/achristie/save2db/pkg/platts"
-	_ "github.com/mattn/go-sqlite3"
+
+	// _ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func main() {

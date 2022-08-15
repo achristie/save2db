@@ -95,13 +95,8 @@ type SymbolHistory struct {
 	} `json:"results"`
 }
 
-type Result struct {
-	SH  SymbolHistory
-	Err error
-}
-
-type DeleteResult struct {
-	SC  SymbolCorrection
+type Result[T any] struct {
+	OK  T
 	Err error
 }
 

@@ -34,12 +34,12 @@ func (c *Client) GetDeletes(StartTime time.Time, Page int, PageSize int) (Symbol
 // Automatically pages through all results.
 // Correction or Error is sent to channel.
 // Errors must be handled by consumer.
-func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan DeleteResult) error {
+func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan Result[SymbolCorrection]) error {
 	sc, err := c.GetDeletes(StartTime, 1, PageSize)
 	if err != nil {
 		return err
 	}
-	ch <- DeleteResult{sc, nil}
+	ch <- Result[SymbolCorrection]{sc, nil}
 
 	sem := make(chan struct{}, 1)
 	var wg sync.WaitGroup
@@ -50,9 +50,9 @@ func (c *Client) GetDeletesConcurrent(StartTime time.Time, PageSize int, ch chan
 			sem <- struct{}{}
 			sc, err := c.GetDeletes(StartTime, page, PageSize)
 			if err != nil {
-				ch <- DeleteResult{SymbolCorrection{}, err}
+				ch <- Result[SymbolCorrection]{SymbolCorrection{}, err}
 			} else {
-				ch <- DeleteResult{sc, nil}
+				ch <- Result[SymbolCorrection]{sc, nil}
 			}
 			<-sem
 		}(i)
@@ -87,13 +87,13 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, Page int, Page
 // Concurrently get history.
 // SymbolHistory or Error is sent to channel.
 // Consumer must decide how to handle err.
-func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, PageSize int, ch chan Result) error {
+func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, PageSize int, ch chan Result[SymbolHistory]) {
 	// get first page
 	sh, err := c.GetHistoryByMDC(Mdc, StartTime, 1, PageSize)
 	if err != nil {
-		return err
+		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
 	}
-	ch <- Result{sh, nil}
+	ch <- Result[SymbolHistory]{sh, nil}
 
 	var wg sync.WaitGroup
 	// semaphore to prevent throttling
@@ -109,9 +109,9 @@ func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, Page
 
 			sh, err := c.GetHistoryByMDC(Mdc, StartTime, page, PageSize)
 			if err != nil {
-				ch <- Result{SymbolHistory{}, err}
+				ch <- Result[SymbolHistory]{SymbolHistory{}, err}
 			} else {
-				ch <- Result{sh, nil}
+				ch <- Result[SymbolHistory]{sh, nil}
 			}
 
 			<-sem
@@ -119,11 +119,10 @@ func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, Page
 	}
 	wg.Wait()
 	close(ch)
-	return nil
 }
 
 // Call Search endpoint to get reference data.
-func (c *Client) GetRefData(Page int, PageSize int) (ReferenceData, error) {
+func (c *Client) GetRefData(StartTime time.Time, Page int, PageSize int) (ReferenceData, error) {
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
 	params.Add("pagesize", strconv.Itoa(PageSize))
@@ -140,5 +139,35 @@ func (c *Client) GetRefData(Page int, PageSize int) (ReferenceData, error) {
 	}
 
 	return result, nil
+}
 
+func (c *Client) GetRefDataConcurrent(StartTime time.Time, PageSize int, ch chan Result[ReferenceData]) {
+	rd, err := c.GetRefData(StartTime, 1, PageSize)
+	if err != nil {
+		ch <- Result[ReferenceData]{ReferenceData{}, err}
+	}
+	ch <- Result[ReferenceData]{rd, nil}
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 2)
+
+	for i := 2; i <= rd.Metadata.TotalPages; i++ {
+		wg.Add(1)
+
+		go func(page int) {
+			defer wg.Done()
+			sem <- struct{}{}
+
+			rd, err := c.GetRefData(StartTime, page, PageSize)
+			if err != nil {
+				ch <- Result[ReferenceData]{ReferenceData{}, err}
+
+			} else {
+				ch <- Result[ReferenceData]{rd, nil}
+			}
+			<-sem
+		}(i)
+	}
+	wg.Wait()
+	close(ch)
 }
