@@ -33,7 +33,8 @@ const (
 		"commodity_grade" INTEGER,
 		"standard_lot_units" TEXT,
 		"decimal_places" INTEGER,
-		"mdc" json
+		"mdc" json,
+		"bates" json
 	);"`
 	ref_data_insert = `INSERT or REPLACE INTO ref_data(
 		symbol,
@@ -55,9 +56,11 @@ const (
 		standard_lot_size, 
 		commodity_grade, 
 		standard_lot_units,
-		decimal_places
+		decimal_places,
+		mdc,
+		bates
 	)
-	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 )
 
 func createRefDataTable(db *sql.DB) {
@@ -73,7 +76,7 @@ func createRefDataTable(db *sql.DB) {
 
 }
 
-// Create our DB (if it does not exist)
+// Create DB (if it does not exist)
 // and create `ref_data` table
 func NewRefDataStore(db *sql.DB) *RefDataStore {
 	createRefDataTable(db)
@@ -99,7 +102,7 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 			r.ContractType, r.Description, r.PublicationFrequencyCode, r.Currency,
 			r.QuotationStyle, r.DeliveryRegion, r.DeliveryRegionBasis, r.SettlementType,
 			r.Active, r.Timestamp, r.UOM, r.DayOfPublication, r.ShippingTerms,
-			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits, r.DecimalPlaces)
+			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits, r.DecimalPlaces, r.MDCJson, r.BateJson)
 
 		if err != nil {
 			tx.Rollback()

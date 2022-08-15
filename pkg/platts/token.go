@@ -21,7 +21,7 @@ type Token struct {
 }
 
 func GetToken(Username string, Password string, APIKey string) Token {
-	if time.Now().Before(cache.Iat.Add(45 * time.Minute)) {
+	if time.Now().Before(cache.Iat.Add(50 * time.Minute)) {
 		return cache
 	}
 	data := url.Values{}
