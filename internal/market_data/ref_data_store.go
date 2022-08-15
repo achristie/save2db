@@ -1,7 +1,9 @@
 package market_data
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"log"
 
 	"github.com/achristie/save2db/pkg/platts"
@@ -98,11 +100,27 @@ func (r *RefDataStore) Add(data platts.ReferenceData) error {
 	}
 
 	for _, r := range data.Results {
-		_, err := tx.Stmt(query).Exec(r.Symbol, r.AssessmentFrequency, r.Commodity,
+
+		// convert bates to JSON
+		bates, err := json.Marshal(&r.Bate)
+		if err != nil {
+			return err
+		}
+
+		// convert MDC to json
+		mdcs := new(bytes.Buffer)
+		enc := json.NewEncoder(mdcs)
+		enc.SetEscapeHTML(false)
+
+		if err := enc.Encode(&r.MDC); err != nil {
+			return err
+		}
+
+		_, err = tx.Stmt(query).Exec(r.Symbol, r.AssessmentFrequency, r.Commodity,
 			r.ContractType, r.Description, r.PublicationFrequencyCode, r.Currency,
 			r.QuotationStyle, r.DeliveryRegion, r.DeliveryRegionBasis, r.SettlementType,
 			r.Active, r.Timestamp, r.UOM, r.DayOfPublication, r.ShippingTerms,
-			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits, r.DecimalPlaces, r.MDCJson, r.BateJson)
+			r.StandardLotSize, r.CommodityGrade, r.StandardLotUnits, r.DecimalPlaces, mdcs.String(), string(bates))
 
 		if err != nil {
 			tx.Rollback()

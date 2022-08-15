@@ -1,7 +1,6 @@
 package platts
 
 import (
-	"bytes"
 	"encoding/json"
 )
 
@@ -26,7 +25,6 @@ type RefResults struct {
 	StandardLotUnits         string   `json:"standard_lot_units"`
 	QuotationStyle           string   `json:"quotation_style"`
 	Bate                     []string `json:"bate_code"`
-	BateJson                 string   `json:"-"`
 	CommodityGrade           string   `json:"commodity_grade"`
 	Currency                 string   `json:"currency"`
 	AssessmentFrequency      string   `json:"assessment_frequency"`
@@ -35,11 +33,10 @@ type RefResults struct {
 	DecimalPlaces            int      `json:"decimal_places"`
 	MDCNames                 []string `json:"mdc"`
 	MDCDescriptions          []string `json:"mdc_description"`
-	MDCJson                  string   `json:"-"`
+	MDC                      []MDC    `json:"-"`
 }
 
 // Extend unmarshalling to zip the MDC fields
-// And create *Json fields for ease of saving in DB
 func (r *RefResults) UnmarshalJSON(data []byte) error {
 	type R RefResults
 	if err := json.Unmarshal(data, (*R)(r)); err != nil {
@@ -50,20 +47,8 @@ func (r *RefResults) UnmarshalJSON(data []byte) error {
 		m = append(m, MDC{Name: v, Description: r.MDCDescriptions[i]})
 	}
 
-	j := new(bytes.Buffer)
-	e := json.NewEncoder(j)
-	e.SetEscapeHTML(false)
+	r.MDC = m
 
-	if err := e.Encode(&m); err != nil {
-		return err
-	}
-	r.MDCJson = j.String()
-
-	b, err := json.Marshal(&r.Bate)
-	if err != nil {
-		return err
-	}
-	r.BateJson = string(b)
 	return nil
 }
 
