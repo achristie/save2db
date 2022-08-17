@@ -2,6 +2,8 @@ package platts
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
@@ -122,52 +124,92 @@ func (c *Client) GetHistoryByMDCConcurrent(Mdc string, StartTime time.Time, Page
 }
 
 // Call Search endpoint to get reference data.
-func (c *Client) GetRefData(StartTime time.Time, Page int, PageSize int) (ReferenceData, error) {
+func (c *Client) GetRefData(StartTime time.Time, PageSize int, ch chan interface{}) {
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
 	params.Add("pagesize", strconv.Itoa(PageSize))
-	params.Add("page", strconv.Itoa(Page))
+	params.Add("page", "1")
+	params.Add("q", "brent")
 
 	req, err := c.newRequest("market-data/reference-data/v3/search", params)
 	if err != nil {
-		return ReferenceData{}, err
+		log.Println(err)
 	}
 
-	var result ReferenceData
-	if _, err = c.do(req, &result); err != nil {
-		return ReferenceData{}, err
-	}
+	c.GetConcurrently(req, ch)
+	log.Println("here")
 
-	return result, nil
 }
 
-func (c *Client) GetRefDataConcurrent(StartTime time.Time, PageSize int, ch chan Result[ReferenceData]) {
-	rd, err := c.GetRefData(StartTime, 1, PageSize)
-	if err != nil {
-		ch <- Result[ReferenceData]{ReferenceData{}, err}
+func (c *Client) GetConcurrently(req *http.Request, ch chan interface{}) {
+
+	// make first request!
+	var result ReferenceData
+	if _, err := c.do(req, &result); err != nil {
+		log.Println(err)
 	}
-	ch <- Result[ReferenceData]{rd, nil}
+	ch <- result
 
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, 2)
 
-	for i := 2; i <= rd.Metadata.TotalPages; i++ {
+	for i := 2; i <= result.Metadata.TotalPages; i++ {
 		wg.Add(1)
 
 		go func(page int) {
 			defer wg.Done()
 			sem <- struct{}{}
 
-			rd, err := c.GetRefData(StartTime, page, PageSize)
-			if err != nil {
-				ch <- Result[ReferenceData]{ReferenceData{}, err}
+			p := req.URL.Path
+			q := req.URL.Query()
+			q.Set("page", strconv.Itoa(page))
 
+			req, err := c.newRequest(p, q)
+			if err != nil {
+				log.Println(err)
+			}
+
+			var result ReferenceData
+			_, err = c.do(req, &result)
+
+			if err != nil {
+				log.Println(err)
 			} else {
-				ch <- Result[ReferenceData]{rd, nil}
+				ch <- result
 			}
 			<-sem
 		}(i)
 	}
+
 	wg.Wait()
 	close(ch)
 }
+
+// rd, err := c.GetRefData(StartTime, 1, PageSize)
+// if err != nil {
+// 	ch <- Result[ReferenceData]{ReferenceData{}, err}
+// }
+// ch <- Result[ReferenceData]{rd, nil}
+
+// var wg sync.WaitGroup
+// sem := make(chan struct{}, 2)
+
+// for i := 2; i <= rd.Metadata.TotalPages; i++ {
+// 	wg.Add(1)
+
+// 	go func(page int) {
+// 		defer wg.Done()
+// 		sem <- struct{}{}
+
+// 		rd, err := c.GetRefData(StartTime, page, PageSize)
+// 		if err != nil {
+// 			ch <- Result[ReferenceData]{ReferenceData{}, err}
+
+// 		} else {
+// 			ch <- Result[ReferenceData]{rd, nil}
+// 		}
+// 		<-sem
+// 	}(i)
+// }
+// wg.Wait()
+// close(ch)

@@ -76,25 +76,43 @@ func GetAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 }
 
 func GetReferenceData(client *platts.Client, db *MD.RefDataStore, start time.Time, pageSize int) {
-	ch := make(chan platts.Result[platts.ReferenceData])
+	ch := make(chan interface{})
+	client.GetRefData(start, pageSize, ch)
 
-	go func() {
-		log.Printf("Fetching Reference Data updated since %s", start.String())
-		client.GetRefDataConcurrent(start, pageSize, ch)
-	}()
+	for {
+		select {
+		// case err := <-errs:
+		// 	// log.Println(err)
 
-	for result := range ch {
-		if result.Err != nil {
-			log.Printf("Error retrieving data: %s", result.Err)
-		} else {
+		case result := <-ch:
+			res := result.(platts.ReferenceData)
+			// log.Println(res.Metadata.TotalPages)
 			log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
-				len(result.OK.Results), result.OK.Metadata.Page, result.OK.Metadata.QueryTime, result.OK.Metadata.Count)
-			if err := db.Add(result.OK); err != nil {
-				log.Printf("Error updating records: %s", err)
-			}
+				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
+
 		}
 	}
+
 }
+
+// ch := make(chan platts.Result[platts.ReferenceData])
+
+// go func() {
+// 	log.Printf("Fetching Reference Data updated since %s", start.String())
+// 	client.GetRefDataConcurrent(start, pageSize, ch)
+// }()
+
+// for result := range ch {
+// 	if result.Err != nil {
+// 		log.Printf("Error retrieving data: %s", result.Err)
+// 	} else {
+// 		log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
+// 			len(result.OK.Results), result.OK.Metadata.Page, result.OK.Metadata.QueryTime, result.OK.Metadata.Count)
+// 		if err := db.Add(result.OK); err != nil {
+// 			log.Printf("Error updating records: %s", err)
+// 		}
+// 	}
+// }
 
 func GetCorrections(client *platts.Client, db *MD.AssessmentsStore, start time.Time, pageSize int) {
 	ch := make(chan platts.Result[platts.SymbolCorrection])

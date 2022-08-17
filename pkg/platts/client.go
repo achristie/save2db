@@ -36,7 +36,6 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 	req.Header.Add("appkey", c.apiKey)
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
 	return req, nil
-
 }
 
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
