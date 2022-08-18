@@ -95,9 +95,24 @@ type SymbolHistory struct {
 	} `json:"results"`
 }
 
-type Result[T any] struct {
-	OK  T
-	Err error
+// Allow pages to be fetched concurrently
+type Concurrentable interface {
+	GetTotalPages() int
+}
+
+func (r ReferenceData) GetTotalPages() int {
+	return r.Metadata.TotalPages
+}
+func (s SymbolCorrection) GetTotalPages() int {
+	return s.Metadata.TotalPages
+}
+func (s SymbolHistory) GetTotalPages() int {
+	return s.Metadata.TotalPages
+}
+
+type Result[T Concurrentable] struct {
+	Message T
+	Err     error
 }
 
 type MDC struct {

@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -57,4 +60,53 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 		return nil, fmt.Errorf("response error [%s] %s: %s", req.Method, u, err)
 	}
 	return res, nil
+}
+
+// Get all pages concurrently
+// Fetches first page to see how many total pages there are
+// If the first page fails then abort
+// Else fetch other pages concurrently
+// Errors must be handled by consumer
+func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Result[T], result T) {
+	if _, err := c.do(req, &result); err != nil {
+		// If first request fails then abort
+		log.Fatalf("Could not make first request: %s", err)
+	}
+	ch <- Result[T]{result, nil}
+
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, 2) // semaphore to avoid throttling
+
+	// create a request per page from 2 .. n
+	for i := 2; i <= result.GetTotalPages(); i++ {
+		wg.Add(1)
+
+		go func(page int) {
+			defer wg.Done()
+			sem <- struct{}{}
+			var result T
+
+			// copy the request but change the page
+			p := req.URL.Path
+			q := req.URL.Query()
+			q.Set("page", strconv.Itoa(page))
+
+			// generate a request
+			req, err := c.newRequest(p, q)
+			if err != nil {
+				ch <- Result[T]{result, err}
+			}
+
+			// make the request
+			_, err = c.do(req, &result)
+			if err != nil {
+				ch <- Result[T]{result, err}
+			}
+			ch <- Result[T]{result, nil} // send marshalled response to the channel
+			<-sem
+		}(i)
+	}
+
+	wg.Wait()
+	close(ch)
 }
