@@ -26,8 +26,8 @@ func createAssessmentTables(db *sql.DB) {
 		"symbol" TEXT NOT NULL,
 		"bate" TEXT NOT NULL,
 		"price" NUM NOT NULL,
-		"assessed_date" datetime NOT NULL,
-		"modified_date" datetime NOT NULL,
+		"assessed_date" TEXT NOT NULL,
+		"modified_date" TEXT NOT NULL,
 		"is_corrected" string NOT NULL
 	);`
 	// PRIMARY KEY (symbol, bate, assessed_date) );`
