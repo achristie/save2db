@@ -74,18 +74,16 @@ func createRefDataTable(db *sql.DB) {
 	defer query.Close()
 
 	query.Exec()
-	log.Println("db: ref_data  table created succesfully")
-
 }
 
-// Create DB (if it does not exist)
-// and create `ref_data` table
+// Create DB and table `ref_data`
 func NewRefDataStore(db *sql.DB) *RefDataStore {
 	createRefDataTable(db)
 
 	return &RefDataStore{database: db}
 }
 
+// Add Reference Data to DB
 func (r *RefDataStore) Add(data platts.ReferenceData) error {
 
 	query, err := r.database.Prepare(ref_data_insert)

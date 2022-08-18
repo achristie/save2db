@@ -19,7 +19,7 @@ func main() {
 	StartDate := flag.String("t", time.Now().UTC().AddDate(0, 0, -3).Format("2006-01-02T15:04:05"), "Get updates since date. Format 2006-01-02T15:04:05")
 	PageSize := flag.Int("p", 5000, "The page size to use for API Calls. Max is 10,000")
 	MDC := flag.String("mdc", "NULL", "The MDC (Market Data Category) to fetch data for")
-	Type := flag.String("type", "A", "placeholder")
+	Type := flag.String("type", "A", "Type of data to fetch. H - HistoricalAssessments, D - AssessmentsDeleted, R - ReferenceData, A - All (H, D, R)")
 	flag.Parse()
 
 	// create a platts api client
@@ -59,11 +59,14 @@ func GetAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 
 	for result := range data {
 		if result.Err != nil {
-			log.Printf("Errro! %s", result.Err)
+			log.Printf("Error! %s", result.Err)
 		} else {
 			res := result.Message
-			log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
+			log.Printf("Assessment Data: %d records received from page [%d] in [%s] (%d total records). Adding to DB",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
+			if err := db.Add(res); err != nil {
+				log.Printf("Error inserting records: %s", err)
+			}
 		}
 	}
 }
@@ -75,11 +78,14 @@ func GetReferenceData(client *platts.Client, db *MD.RefDataStore, start time.Tim
 
 	for result := range data {
 		if result.Err != nil {
-			log.Printf("Errro! %s", result.Err)
+			log.Printf("Error! %s", result.Err)
 		} else {
 			res := result.Message
-			log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
+			log.Printf("Reference Data: %d records received from page [%d] in [%s] (%d total records). Adding to DB",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
+			if err := db.Add(res); err != nil {
+				log.Printf("Error inserting records: %s", err)
+			}
 		}
 	}
 }
@@ -91,11 +97,14 @@ func GetDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time,
 
 	for result := range data {
 		if result.Err != nil {
-			log.Printf("Errro! %s", result.Err)
+			log.Printf("Error! %s", result.Err)
 		} else {
 			res := result.Message
-			log.Printf("%d records received from page [%d] in [%s] (%d total records). Removing from DB",
+			log.Printf("Deletes: %d records received from page [%d] in [%s] (%d total records). Removing from DB",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
+			if err := db.Remove(res); err != nil {
+				log.Printf("Error removing records: %s", err)
+			}
 		}
 	}
 }

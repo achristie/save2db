@@ -38,11 +38,9 @@ func createAssessmentTables(db *sql.DB) {
 	defer query.Close()
 
 	query.Exec()
-	log.Println("db: assessments table created succesfully")
 }
 
-// Create our DB (if it does not exist)
-// and create `market_data` table
+// Create DB and `assessments` table
 func NewAssessmentsStore(db *sql.DB) *AssessmentsStore {
 
 	createAssessmentTables(db)
