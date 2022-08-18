@@ -62,9 +62,8 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	return res, nil
 }
 
-// Get all pages concurrently
-// Fetches first page to see how many total pages there are
-// If the first page fails then abort else get all pages concurrently
+// Page through the API response to get all results.
+// If the first page fails then abort, otherwise attempt to get all pages.
 // Errors must be handled by consumer
 func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Result[T], result T) {
 	if _, err := c.do(req, &result); err != nil {

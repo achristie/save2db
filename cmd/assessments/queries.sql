@@ -5,7 +5,7 @@ select * from ref_data;
 SELECT *
 FROM ref_data, json_each(mdc)
 WHERE 
-    json_extract(json_each.value, '$.description') LIKE '%Refined%';
+    json_extract(json_each.value, '$.description') LIKE '%Oil%';
 
 
 select *
@@ -16,6 +16,8 @@ select *, count(*) from assessments
 group by symbol, bate, assessed_date
 having count(*) > 1;
 
+
+select count(*) from assessments;
 
 select * from assessments
 where assessed_date between '2022-05-01' and '2022-06-01';
@@ -28,3 +30,7 @@ group by symbol, year_month;
 
 
 -- all the latest prices for symbols in 'Refined'
+
+
+-- find the latest modified date. A reasonable choice for `t` when running assessments.exe
+select max(modified_date) from assessments;

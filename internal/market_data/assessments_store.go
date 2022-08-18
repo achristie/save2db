@@ -28,9 +28,9 @@ func createAssessmentTables(db *sql.DB) {
 		"price" NUM NOT NULL,
 		"assessed_date" TEXT NOT NULL,
 		"modified_date" TEXT NOT NULL,
-		"is_corrected" string NOT NULL
-	);`
-	// PRIMARY KEY (symbol, bate, assessed_date) );`
+		"is_corrected" string NOT NULL,
+	PRIMARY KEY (symbol, bate, assessed_date) );`
+
 	query, err := db.Prepare(assessments_table)
 	if err != nil {
 		log.Fatal(err)
