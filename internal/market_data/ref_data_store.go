@@ -66,7 +66,6 @@ const (
 )
 
 func createRefDataTable(db *sql.DB) {
-
 	query, err := db.Prepare(ref_data_table)
 	if err != nil {
 		log.Fatal(err)
@@ -85,7 +84,6 @@ func NewRefDataStore(db *sql.DB) *RefDataStore {
 
 // Add Reference Data to DB
 func (r *RefDataStore) Add(data platts.ReferenceData) error {
-
 	query, err := r.database.Prepare(ref_data_insert)
 	if err != nil {
 		return err

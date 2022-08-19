@@ -16,7 +16,7 @@ type dbClass struct {
 	bate         string
 	modifiedDate string
 	assessedDate string
-	price        float64
+	value        float64
 	isCorrected  string
 }
 
@@ -25,7 +25,7 @@ func createAssessmentTables(db *sql.DB) {
 	assessments_table := `CREATE TABLE IF NOT EXISTS assessments (
 		"symbol" TEXT NOT NULL,
 		"bate" TEXT NOT NULL,
-		"price" NUM NOT NULL,
+		"value" NUM NOT NULL,
 		"assessed_date" TEXT NOT NULL,
 		"modified_date" TEXT NOT NULL,
 		"is_corrected" string NOT NULL,
@@ -97,7 +97,7 @@ func (m *AssessmentsStore) Add(data platts.SymbolHistory) error {
 			records = append(records, dbClass{
 				symbol:       v.Symbol,
 				bate:         v2.Bate,
-				price:        v2.Value,
+				value:        v2.Value,
 				modifiedDate: v2.ModDate,
 				assessedDate: v2.AssessDate,
 				isCorrected:  v2.IsCorrected,
@@ -109,7 +109,7 @@ func (m *AssessmentsStore) Add(data platts.SymbolHistory) error {
 
 // insert is the internal implementation for Add
 func (m *AssessmentsStore) insert(records []dbClass) error {
-	ins := `INSERT or REPLACE INTO assessments(symbol, bate, price, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
+	ins := `INSERT or REPLACE INTO assessments(symbol, bate, value, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := m.database.Prepare(ins)
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (m *AssessmentsStore) insert(records []dbClass) error {
 	}
 
 	for _, r := range records {
-		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.price, r.assessedDate, r.modifiedDate, r.isCorrected)
+		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.value, r.assessedDate, r.modifiedDate, r.isCorrected)
 		if err != nil {
 			tx.Rollback()
 			return err

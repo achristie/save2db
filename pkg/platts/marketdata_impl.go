@@ -27,14 +27,30 @@ func (c *Client) GetDeletes(StartTime time.Time, PageSize int, ch chan Result[Sy
 	}()
 }
 
-// Call HistoryByMDC endpoint to get historical price assessments for Symbols by Market Data Category
+func (c *Client) GetHistory(StartTime time.Time, PageSize int, ch chan Result[SymbolHistory]) {
+	params := url.Values{}
+	params.Add("filter", fmt.Sprintf("modDate >= %q", StartTime.Format("2006-01-02T15:04:05")))
+	params.Add("sort", "modDate: asc")                         // important for paging properly
+	params.Add("pagesize", strconv.Itoa(min(10000, PageSize))) // max is 10k
+
+	req, err := c.newRequest("market-data/v3/value/history/", params)
+	if err != nil {
+		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
+	}
+
+	go func() {
+		var result SymbolHistory
+		getConcurrently(c, req, ch, result)
+	}()
+}
+
+// Call HistoryByMDC endpoint to get historical price assessments for Symbols by Market Data Category.
 // Platts Symbols are grouped into MDCs
 func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, PageSize int, ch chan Result[SymbolHistory]) {
 	params := url.Values{}
 	params.Add("filter", fmt.Sprintf("mdc IN (%q) AND modDate >= %q", Mdc, StartTime.Format("2006-01-02T15:04:05")))
 	params.Add("sort", "modDate: asc")                         // important for paging properly
 	params.Add("pagesize", strconv.Itoa(min(10000, PageSize))) // max is 10k
-	params.Add("page", "1")
 
 	req, err := c.newRequest("market-data/v3/value/history/mdc", params)
 	if err != nil {

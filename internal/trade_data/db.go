@@ -1,4 +1,4 @@
-package trade_data
+package trades
 
 import (
 	"database/sql"
