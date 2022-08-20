@@ -9,12 +9,12 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-type RefDataStore struct {
+type SymbolStore struct {
 	database *sql.DB
 }
 
 const (
-	ref_data_table = `CREATE TABLE IF NOT EXISTS ref_data (
+	symbol_create = `CREATE TABLE IF NOT EXISTS symbols (
 		"symbol" TEXT NOT NULL PRIMARY KEY,
 		"assessment_frequency" TEXT,
 		"commodity" TEXT,
@@ -38,7 +38,7 @@ const (
 		"mdc" json,
 		"bates" json
 	);"`
-	ref_data_insert = `INSERT or REPLACE INTO ref_data(
+	symbol_insert = `INSERT or REPLACE INTO symbols(
 		symbol,
 		assessment_frequency,
 		commodity,
@@ -65,8 +65,8 @@ const (
 	VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 )
 
-func createRefDataTable(db *sql.DB) {
-	query, err := db.Prepare(ref_data_table)
+func createSymbolTable(db *sql.DB) {
+	query, err := db.Prepare(symbol_create)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -76,15 +76,15 @@ func createRefDataTable(db *sql.DB) {
 }
 
 // Create DB and table `ref_data`
-func NewRefDataStore(db *sql.DB) *RefDataStore {
-	createRefDataTable(db)
+func NewSymbolStore(db *sql.DB) *SymbolStore {
+	createSymbolTable(db)
 
-	return &RefDataStore{database: db}
+	return &SymbolStore{database: db}
 }
 
 // Add Reference Data to DB
-func (r *RefDataStore) Add(data platts.ReferenceData) error {
-	query, err := r.database.Prepare(ref_data_insert)
+func (r *SymbolStore) Add(data platts.SymbolData) error {
+	query, err := r.database.Prepare(symbol_insert)
 	if err != nil {
 		return err
 	}

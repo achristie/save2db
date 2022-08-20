@@ -65,7 +65,7 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, PageSize int, 
 
 // Call Search endpoint to get Reference Data for Symbols
 // Example fields include Description, Commodity, Geography, etc..
-func (c *Client) GetReferenceData(StartTime time.Time, PageSize int, ch chan Result[ReferenceData]) {
+func (c *Client) GetReferenceData(StartTime time.Time, PageSize int, ch chan Result[SymbolData]) {
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
 	params.Add("pagesize", strconv.Itoa(min(1000, PageSize))) // max is 1k
@@ -73,11 +73,11 @@ func (c *Client) GetReferenceData(StartTime time.Time, PageSize int, ch chan Res
 
 	req, err := c.newRequest("market-data/reference-data/v3/search", params)
 	if err != nil {
-		ch <- Result[ReferenceData]{ReferenceData{}, err}
+		ch <- Result[SymbolData]{SymbolData{}, err}
 	}
 
 	go func() {
-		var result ReferenceData
+		var result SymbolData
 		getConcurrently(c, req, ch, result)
 	}()
 }

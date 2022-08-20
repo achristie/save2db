@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 )
 
-type ReferenceData struct {
-	Metadata RefMetadata  `json:"metadata"`
-	Results  []RefResults `json:"results"`
+type SymbolData struct {
+	Metadata SymbolMetadata  `json:"metadata"`
+	Results  []SymbolResults `json:"results"`
 }
 
-type RefResults struct {
+type SymbolResults struct {
 	Symbol                   string   `json:"symbol"`
 	Description              string   `json:"description"`
 	Commodity                string   `json:"commodity"`
@@ -37,8 +37,8 @@ type RefResults struct {
 }
 
 // Extend unmarshalling to zip the MDC fields
-func (r *RefResults) UnmarshalJSON(data []byte) error {
-	type R RefResults
+func (r *SymbolResults) UnmarshalJSON(data []byte) error {
+	type R SymbolResults
 	if err := json.Unmarshal(data, (*R)(r)); err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ type Metadata struct {
 	QueryTime  string `json:"queryTime"`
 }
 
-type RefMetadata struct {
+type SymbolMetadata struct {
 	Count      int    `json:"count"`
 	PageSize   int    `json:"page_size"`
 	Page       int    `json:"page"`
@@ -100,7 +100,7 @@ type Concurrentable interface {
 	GetTotalPages() int
 }
 
-func (r ReferenceData) GetTotalPages() int {
+func (r SymbolData) GetTotalPages() int {
 	return r.Metadata.TotalPages
 }
 func (s SymbolCorrection) GetTotalPages() int {

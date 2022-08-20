@@ -28,7 +28,7 @@ func main() {
 	// initialize DB and create necessary tables
 	db := MD.NewDb("database.db")
 	as := MD.NewAssessmentsStore(db)
-	rs := MD.NewRefDataStore(db)
+	rs := MD.NewSymbolStore(db)
 
 	// initial parameters
 	start, err := time.Parse("2006-01-02T15:04:05", *StartDate)
@@ -72,8 +72,8 @@ func GetAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 }
 
 // Get Reference Data and put into `ref_data` table
-func GetReferenceData(client *platts.Client, db *MD.RefDataStore, start time.Time, pageSize int) {
-	data := make(chan platts.Result[platts.ReferenceData])
+func GetReferenceData(client *platts.Client, db *MD.SymbolStore, start time.Time, pageSize int) {
+	data := make(chan platts.Result[platts.SymbolData])
 	client.GetReferenceData(start, pageSize, data)
 
 	for result := range data {
