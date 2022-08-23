@@ -69,7 +69,7 @@ func (c *Client) GetReferenceData(StartTime time.Time, PageSize int, ch chan Res
 	params := url.Values{}
 	params.Add("subscribed_only", "true")
 	params.Add("pagesize", strconv.Itoa(min(1000, PageSize))) // max is 1k
-	params.Add("q", "brent")
+	params.Add("q", "ET")
 
 	req, err := c.newRequest("market-data/reference-data/v3/search", params)
 	if err != nil {

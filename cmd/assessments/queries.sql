@@ -1,63 +1,91 @@
--- SQLite
-select
-  *
-from
-  ref_data;
-
+-- Get the symbols that have a MDC Description that contains "Electricity"
 SELECT
   *
 FROM
-  ref_data,
+  symbols,
   json_each(mdc)
 WHERE
-  json_extract(json_each.value, '$.description') LIKE '%Oil%';
+  json_extract(json_each.value, '$.description') LIKE '%Electricity%';
 
-select
-  *
-from
-  assessments;
+-- Get the list of MDCs and their descriptions
+SELECT
+  json_extract(json_each.value, "$.name") name,
+  json_extract(json_each.value, "$.description") description,
+  count(*) symbol_count
+FROM
+  symbols,
+  json_each(mdc)
+GROUP BY
+  name;
 
-select
-  *,
-  count(*)
-from
-  assessments
-group by
-  symbol,
-  bate,
-  assessed_date
-having
-  count(*) > 1;
+-- Get the list of Commodoties and Regions
+SELECT
+  commodity,
+  delivery_region,
+  count(*) as symbol_count
+FROM
+  symbols
+GROUP BY
+  commodity,
+  delivery_region
+ORDER BY
+  commodity;
 
-select
-  count(*)
-from
-  assessments;
+-- Get the largest close price per month in $/BBL
+SELECT
+  s.symbol,
+  max(a.value) max_value,
+  strftime("%Y-%m", a.assessed_date) as year_month,
+  a.assessed_date
+FROM
+  symbols s
+  JOIN assessments a on s.symbol = a.symbol
+WHERE
+  a.bate = "c"
+  AND s.uom = "BBL"
+  AND s.currency = "USD"
+GROUP BY
+  year_month
+ORDER BY
+  year_month ASC;
 
-select
-  *
-from
-  assessments
-where
-  assessed_date between '2022-05-01' and '2022-06-01';
+-- Get last 12 months of spot assessments for all symbols tagged with "Crude oil" commodity
+SELECT
+  s.symbol,
+  s.description,
+  s.delivery_region,
+  s.delivery_region_basis,
+  s.currency,
+  s.uom,
+  a.bate,
+  a.assessed_date
+FROM
+  symbols s
+  JOIN assessments a ON s.symbol = a.symbol
+WHERE
+  s.commodity = "Crude oil"
+  AND a.assessed_date >= datetime('now', "-1 year")
+  AND s.contract_type = "Spot";
 
--- find the largest close price per symbol per month
-select
-  symbol,
-  max(price),
-  strftime("%Y-%m", assessed_date) as year_month,
-  assessed_date
-from
-  assessments
-where
-  bate = 'c'
-group by
-  symbol,
-  year_month;
-
--- all the latest prices for symbols in 'Refined'
--- find the latest modified date. A reasonable choice for `t` when running assessments.exe
-select
+-- find the latest modified date. A reasonable choice for `t` when running assessments.exe to fetch updated date
+SELECT
   max(modified_date)
-from
+FROM
   assessments;
+
+-- Get all assessments for a list of symbols and include description and currency
+SELECT
+  s.symbol,
+  s.description,
+  s.currency,
+  a.bate,
+  a.value,
+  a.assessed_date
+FROM
+  symbols s
+  JOIN assessments a ON s.symbol = a.symbol
+WHERE
+  s.symbol IN ("AAGOQ00", "AAGOP00")
+  AND a.bate = "c"
+ORDER BY
+  a.assessed_date ASC;

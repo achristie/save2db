@@ -19,7 +19,7 @@ func main() {
 	StartDate := flag.String("t", time.Now().UTC().AddDate(0, 0, -3).Format("2006-01-02T15:04:05"), "Get updates since date. Format 2006-01-02T15:04:05")
 	PageSize := flag.Int("p", 5000, "The page size to use for API Calls. Max is 10,000")
 	MDC := flag.String("mdc", "NULL", "The MDC (Market Data Category) to fetch data for")
-	Type := flag.String("type", "A", "Type of data to fetch. H - HistoricalAssessments, D - AssessmentsDeleted, R - ReferenceData, A - All (H, D, R)")
+	Type := flag.String("type", "E", "Type of data to fetch. A - Assessments, D - Deleted Assessments, S - Symbol Data, E - Everything (A, D, S)")
 	flag.Parse()
 
 	// create a platts api client
@@ -37,17 +37,17 @@ func main() {
 	}
 
 	// All or History
-	if *Type == "A" || *Type == "H" {
+	if *Type == "E" || *Type == "A" {
 		GetAssessments(client, as, *MDC, start, *PageSize)
 	}
 
 	// All or Reference
-	if *Type == "A" || *Type == "R" {
+	if *Type == "E" || *Type == "S" {
 		GetReferenceData(client, rs, start, *PageSize)
 	}
 
 	// All or Deletes
-	if *Type == "A" || *Type == "D" {
+	if *Type == "E" || *Type == "D" {
 		GetDeletes(client, as, start, *PageSize)
 	}
 }
