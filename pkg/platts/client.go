@@ -73,7 +73,7 @@ func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Res
 	ch <- Result[T]{result, nil}
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 2) // semaphore to avoid throttling
+	sem := make(chan struct{}, 1) // semaphore to avoid throttling
 
 	// create a request per page from 2 .. n
 	for i := 2; i <= result.GetTotalPages(); i++ {
