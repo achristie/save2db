@@ -19,5 +19,8 @@
 *.db
 *.db-*
 
-
+# Notebook files
 .ipynb_checkpoints
+
+# Logs
+*.log
