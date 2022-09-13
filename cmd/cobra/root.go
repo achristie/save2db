@@ -24,12 +24,22 @@ func Execute() {
 	}
 }
 
+var username, password, apikey string
+
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&username, "username", "", "Your Username for calling Platts APIs")
+	viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
+	// rootCmd.MarkPersistentFlagRequired("username")
+	rootCmd.PersistentFlags().StringVar(&password, "password", "", "The Password associated with your Username")
+	viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("username"))
+
+	rootCmd.PersistentFlags().StringVar(&apikey, "apikey", "", "Your API Key for calling Platts APIs")
+	viper.BindPFlag("apikey", rootCmd.PersistentFlags().Lookup("username"))
 }
 
 func initConfig() {
-
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
 	configName := ".plattsrc"
