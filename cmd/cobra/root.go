@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 	Short: "Platts CLI!",
 	Long:  "Get your platts data via CLI",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("test")
+
 	},
 }
 
@@ -32,10 +32,13 @@ func initConfig() {
 
 	home, err := os.UserHomeDir()
 	cobra.CheckErr(err)
+	configName := ".plattsrc"
 	viper.AddConfigPath(home)
 	viper.SetConfigType("env")
-	viper.SetConfigName(".platts")
-	fmt.Println(home)
+	viper.SetConfigName(configName)
+
+	// create if the config does not yet exists
+	os.OpenFile(fmt.Sprintf("%s/%s", home, configName), os.O_CREATE|os.O_RDONLY, 0666)
 
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err == nil {

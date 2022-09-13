@@ -34,7 +34,10 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 	url := &c.baseURL
 	req, _ := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
 
-	token := GetToken(c.username, c.password, c.apiKey)
+	token, err := GetToken(c.username, c.password, c.apiKey)
+	if err != nil {
+		log.Fatal(err)
+	}
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("appkey", c.apiKey)
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
