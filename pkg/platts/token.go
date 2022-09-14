@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,7 +30,6 @@ func GetToken(Username string, Password string, APIKey string) (Token, error) {
 
 	req, err := http.NewRequest("POST", TokenEndpoint, strings.NewReader(data.Encode()))
 	if err != nil {
-		// log.Fatal(err)
 		return Token{}, err
 	}
 
@@ -40,20 +38,19 @@ func GetToken(Username string, Password string, APIKey string) (Token, error) {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		// log.Fatal(err)
 		return Token{}, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := ioutil.ReadAll(res.Body)
-		return Token{}, fmt.Errorf("Not able to fetch a token. Please check your credentials: %s", body)
+		return Token{}, fmt.Errorf("unable to fetch a token; please check your credentials: %s", body)
 	}
 
 	j := json.NewDecoder(res.Body)
 	var token Token
 	if err = j.Decode(&token); err != nil {
-		log.Fatal(err)
+		return Token{}, err
 	}
 	token.Iat = time.Now()
 	cache = token

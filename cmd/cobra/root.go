@@ -22,8 +22,6 @@ func Execute() {
 	}
 }
 
-var username, password, apikey string
-
 func init() {
 	cobra.OnInitialize(initConfig)
 }

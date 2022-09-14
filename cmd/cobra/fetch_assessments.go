@@ -16,7 +16,6 @@ import (
 var faCmd = &cobra.Command{
 	Use:   "assessments",
 	Short: "Fetch assessments data",
-	// PreRun: initLogging,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// create a platts api client
@@ -43,15 +42,13 @@ var faCmd = &cobra.Command{
 	},
 }
 
-var mdc, startDate string
-
 func init() {
 	fetchCmd.AddCommand(faCmd)
 
-	faCmd.PersistentFlags().StringVar(&mdc, "mdc", "", "Which Market Data Category to use")
+	faCmd.PersistentFlags().String("mdc", "", "Which Market Data Category to use")
 	viper.BindPFlag("mdc", faCmd.PersistentFlags().Lookup("mdc"))
 
-	faCmd.PersistentFlags().StringVar(&startDate, "t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get updates since. modDate >= t")
+	faCmd.PersistentFlags().String("t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get updates since. modDate >= t")
 	viper.BindPFlag("startDate", faCmd.PersistentFlags().Lookup("t"))
 
 }
