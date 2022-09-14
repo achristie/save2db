@@ -20,13 +20,13 @@ type Client struct {
 	c        *http.Client
 }
 
-func NewClient(apiKey *string, username *string, password *string) *Client {
+func NewClient(apiKey string, username string, password string) *Client {
 	return &Client{
-		apiKey:   *apiKey,
+		apiKey:   apiKey,
 		baseURL:  "https://api.platts.com/",
 		c:        &http.Client{Timeout: time.Minute},
-		username: *username,
-		password: *password,
+		username: username,
+		password: password,
 	}
 }
 
