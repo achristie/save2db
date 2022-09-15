@@ -8,6 +8,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+type config struct {
+	Username string
+	Password string
+	ApiKey   string
+}
+
+var conf *config
+
 var rootCmd = &cobra.Command{
 	Use:              "platts-cli",
 	Short:            "Platts CLI!",
@@ -38,7 +46,15 @@ func initConfig() {
 	os.OpenFile(fmt.Sprintf("%s/%s", home, configName), os.O_CREATE|os.O_RDONLY, 0666)
 
 	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("using config file: ", viper.ConfigFileUsed())
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		fmt.Printf("unable to read config: %v", err)
+	}
+
+	conf := &config{}
+	err = viper.Unmarshal(conf)
+	if err != nil {
+		fmt.Printf("unable to decode config: %v", err)
 	}
 }

@@ -83,7 +83,7 @@ func NewSymbolStore(db *sql.DB) *SymbolStore {
 }
 
 // Add Reference Data to DB
-func (r *SymbolStore) Add(data platts.SymbolData) error {
+func (r *SymbolStore) Add(data []platts.SymbolResults) error {
 	query, err := r.database.Prepare(symbol_insert)
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (r *SymbolStore) Add(data platts.SymbolData) error {
 		return err
 	}
 
-	for _, r := range data.Results {
+	for _, r := range data {
 
 		// convert bates to JSON
 		bates, err := json.Marshal(&r.Bate)

@@ -95,6 +95,15 @@ type SymbolHistory struct {
 	} `json:"results"`
 }
 
+type FlatSymbolHistory struct {
+	Symbol      string
+	Bate        string
+	Value       float64
+	AssessDate  string
+	IsCorrected string
+	ModDate     string
+}
+
 // Allow pages to be fetched concurrently
 type Concurrentable interface {
 	GetTotalPages() int
