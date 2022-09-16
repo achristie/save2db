@@ -32,7 +32,7 @@ var symCmd = &cobra.Command{
 			log.Fatal("Could not parse time: ", err)
 		}
 
-		p := cli.NewProgram([]string{"Symbols"})
+		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", viper.GetString("mdc"), start), []string{"Symbols"})
 
 		go func() {
 			getReferenceData(client, ss, start, viper.GetString("mdc"), 1000, p)

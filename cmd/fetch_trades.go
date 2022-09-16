@@ -31,7 +31,7 @@ var tradeCmd = &cobra.Command{
 			log.Fatal("Could not parse time: ", err)
 		}
 
-		p := cli.NewProgram([]string{"Trades"})
+		p := cli.NewProgram("test", []string{"Trades"})
 
 		go func() {
 			GetTrades(client, tds, start, 1000, p)

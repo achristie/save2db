@@ -32,7 +32,7 @@ var faCmd = &cobra.Command{
 			log.Fatal("Could not parse time: ", err)
 		}
 
-		p := cli.NewProgram([]string{"Assessments", "Deletes"})
+		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", viper.GetString("mdc"), start), []string{"Assessments", "Deletes"})
 
 		go func() {
 			getAssessments(client, as, viper.GetString("mdc"), start, 10000, p)
@@ -67,7 +67,7 @@ func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 	if err := db.Add(a); err != nil {
 		log.Printf("Error inserting records: %s", err)
 	}
-	fmt.Printf("Added [%d records] to [assessments]", len(a))
+	p.Send(cli.ProgressUpdater{Name: "Assessments", StatusMessage: fmt.Sprintf("Complete! Added [%d records] to [assessments]", len(a))})
 }
 
 // Get Deleted Assessments and remove from `assessments` table
@@ -92,5 +92,5 @@ func getDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time,
 	if err := db.Remove(a); err != nil {
 		log.Printf("Error removing records: %s", err)
 	}
-	fmt.Printf("Removed [%d records] from [assessments]", len(a))
+	p.Send(cli.ProgressUpdater{Name: "Deletes", StatusMessage: fmt.Sprintf("Complete! Removed [%d records] from [assessments]", len(a))})
 }
