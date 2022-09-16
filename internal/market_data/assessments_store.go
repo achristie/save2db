@@ -11,15 +11,6 @@ type AssessmentsStore struct {
 	database *sql.DB
 }
 
-type dbClass struct {
-	symbol       string
-	bate         string
-	modifiedDate string
-	assessedDate string
-	value        float64
-	isCorrected  string
-}
-
 // creating the assessments table
 func createAssessmentTables(db *sql.DB) {
 	assessments_table := `CREATE TABLE IF NOT EXISTS assessments (
@@ -42,29 +33,13 @@ func createAssessmentTables(db *sql.DB) {
 
 // Create DB and `assessments` table
 func NewAssessmentsStore(db *sql.DB) *AssessmentsStore {
-
 	createAssessmentTables(db)
 
 	return &AssessmentsStore{database: db}
 }
 
-// Remove a Symbol-Bate-Assessed Date from the DB
-func (m *AssessmentsStore) Remove(data platts.SymbolCorrection) error {
-	var records []dbClass
-	for _, v := range data.Results {
-		for _, v2 := range v.Data {
-			records = append(records, dbClass{
-				symbol:       v.Symbol,
-				bate:         v2.Bate,
-				assessedDate: v2.AssessDate,
-			})
-		}
-	}
-	return m.del(records)
-}
-
-// del is the internal implementation for Remove
-func (m *AssessmentsStore) del(records []dbClass) error {
+// Remove deleted records from the DB
+func (m *AssessmentsStore) Remove(records []platts.Assessment) error {
 	del := `DELETE FROM assessments where symbol = ? and bate = ? and assessed_date = ?`
 	query, err := m.database.Prepare(del)
 	if err != nil {
@@ -79,7 +54,7 @@ func (m *AssessmentsStore) del(records []dbClass) error {
 	}
 
 	for _, r := range records {
-		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.assessedDate)
+		_, err := tx.Stmt(query).Exec(r.Symbol, r.Bate, r.AssessDate)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -88,27 +63,8 @@ func (m *AssessmentsStore) del(records []dbClass) error {
 	return tx.Commit()
 }
 
-// Add symbol history to the database
-func (m *AssessmentsStore) Add(data platts.SymbolHistory) error {
-	var records []dbClass
-	// change data structure for ease of INSERT
-	for _, v := range data.Results {
-		for _, v2 := range v.Data {
-			records = append(records, dbClass{
-				symbol:       v.Symbol,
-				bate:         v2.Bate,
-				value:        v2.Value,
-				modifiedDate: v2.ModDate,
-				assessedDate: v2.AssessDate,
-				isCorrected:  v2.IsCorrected,
-			})
-		}
-	}
-	return m.insert(records)
-}
-
-// insert is the internal implementation for Add
-func (m *AssessmentsStore) insert(records []dbClass) error {
+// Add Assessments
+func (m *AssessmentsStore) Add(records []platts.Assessment) error {
 	ins := `INSERT or REPLACE INTO assessments(symbol, bate, value, assessed_date, modified_date, is_corrected) VALUES(?, ?, ?, ?, ?, ?)`
 	query, err := m.database.Prepare(ins)
 	if err != nil {
@@ -123,7 +79,7 @@ func (m *AssessmentsStore) insert(records []dbClass) error {
 	}
 
 	for _, r := range records {
-		_, err := tx.Stmt(query).Exec(r.symbol, r.bate, r.value, r.assessedDate, r.modifiedDate, r.isCorrected)
+		_, err := tx.Stmt(query).Exec(r.Symbol, r.Bate, r.Value, r.AssessDate, r.ModDate, r.IsCorrected)
 		if err != nil {
 			tx.Rollback()
 			return err

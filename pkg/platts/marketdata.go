@@ -95,7 +95,7 @@ type SymbolHistory struct {
 	} `json:"results"`
 }
 
-type FlatSymbolHistory struct {
+type Assessment struct {
 	Symbol      string
 	Bate        string
 	Value       float64

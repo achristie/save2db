@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -24,7 +25,6 @@ var faCmd = &cobra.Command{
 		// initialize DB and create necessary tables
 		db := MD.NewDb("database2.db")
 		as := MD.NewAssessmentsStore(db)
-		// rs := MD.NewSymbolStore(db)
 
 		// initial parameters
 		start, err := time.Parse("2006-01-02T15:04:05", viper.GetString("startDate"))
@@ -36,7 +36,7 @@ var faCmd = &cobra.Command{
 
 		go func() {
 			getAssessments(client, as, viper.GetString("mdc"), start, 10000, p)
-			GetDeletes(client, as, start, 10000, p)
+			getDeletes(client, as, start, 10000, p)
 		}()
 		p.Start()
 	},
@@ -44,18 +44,12 @@ var faCmd = &cobra.Command{
 
 func init() {
 	fetchCmd.AddCommand(faCmd)
-
-	// faCmd.PersistentFlags().String("mdc", "", "Which Market Data Category to use")
-	// viper.BindPFlag("mdc", faCmd.PersistentFlags().Lookup("mdc"))
-
-	// faCmd.PersistentFlags().String("t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get updates since. modDate >= t")
-	// viper.BindPFlag("startDate", faCmd.PersistentFlags().Lookup("t"))
-
 }
 
 func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, start time.Time, pageSize int, p *tea.Program) {
 	data := make(chan platts.Result[platts.SymbolHistory])
 	client.GetHistoryByMDC(MDC, start, pageSize, data)
+	a := []platts.Assessment{}
 
 	for result := range data {
 		if result.Err != nil {
@@ -64,19 +58,23 @@ func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 			res := result.Message
 			pu := cli.ProgressUpdater{Name: "Assessments", Percent: 1 / float64(res.Metadata.TotalPages)}
 			p.Send(pu)
-			log.Printf("Assessment Data: %d records received from page [%d] in [%s] (%d total records). Adding to DB",
+			log.Printf("Assessment Data: %d records received from page [%d] in [%s] (%d total records).",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
-			if err := db.Add(res); err != nil {
-				log.Printf("Error inserting records: %s", err)
-			}
+
+			a = append(a, res.Flatten()...)
 		}
 	}
+	if err := db.Add(a); err != nil {
+		log.Printf("Error inserting records: %s", err)
+	}
+	fmt.Printf("Added [%d records] to [assessments]", len(a))
 }
 
 // Get Deleted Assessments and remove from `assessments` table
-func GetDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time, pageSize int, p *tea.Program) {
+func getDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time, pageSize int, p *tea.Program) {
 	data := make(chan platts.Result[platts.SymbolCorrection])
 	client.GetDeletes(start, pageSize, data)
+	a := []platts.Assessment{}
 
 	for result := range data {
 		if result.Err != nil {
@@ -85,11 +83,14 @@ func GetDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time,
 			res := result.Message
 			pu := cli.ProgressUpdater{Name: "Deletes", Percent: 1 / float64(res.Metadata.TotalPages)}
 			p.Send(pu)
-			log.Printf("Deletes: %d records received from page [%d] in [%s] (%d total records). Removing from DB",
+			log.Printf("Deletes: %d records received from page [%d] in [%s] (%d total records).",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
-			if err := db.Remove(res); err != nil {
-				log.Printf("Error removing records: %s", err)
-			}
+
+			a = append(a, res.Flatten()...)
 		}
 	}
+	if err := db.Remove(a); err != nil {
+		log.Printf("Error removing records: %s", err)
+	}
+	fmt.Printf("Removed [%d records] from [assessments]", len(a))
 }

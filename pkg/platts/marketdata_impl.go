@@ -88,3 +88,34 @@ func min(a, b int) int {
 	}
 	return b
 }
+
+func (s *SymbolCorrection) Flatten() []Assessment {
+	var f []Assessment
+	for _, v := range s.Results {
+		for _, v2 := range v.Data {
+			f = append(f, Assessment{
+				Symbol:     v.Symbol,
+				Bate:       v2.Bate,
+				AssessDate: v2.AssessDate,
+			})
+		}
+	}
+	return f
+}
+
+func (s *SymbolHistory) Flatten() []Assessment {
+	var f []Assessment
+	for _, v := range s.Results {
+		for _, v2 := range v.Data {
+			f = append(f, Assessment{
+				Symbol:      v.Symbol,
+				Bate:        v2.Bate,
+				Value:       v2.Value,
+				ModDate:     v2.ModDate,
+				AssessDate:  v2.AssessDate,
+				IsCorrected: v2.IsCorrected,
+			})
+		}
+	}
+	return f
+}
