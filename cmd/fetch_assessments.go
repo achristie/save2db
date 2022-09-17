@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	MD "github.com/achristie/save2db/internal/market_data"
@@ -50,10 +51,13 @@ func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 	data := make(chan platts.Result[platts.SymbolHistory])
 	client.GetHistoryByMDC(MDC, start, pageSize, data)
 	a := []platts.Assessment{}
+	p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.INPROGRESS, Msg: "In Progress"}})
 
 	for result := range data {
 		if result.Err != nil {
 			log.Printf("Error! %s", result.Err)
+			p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}})
+			os.Exit(1)
 		} else {
 			res := result.Message
 			pu := cli.ProgressUpdater{Name: "Assessments", Percent: 1 / float64(res.Metadata.TotalPages)}
@@ -66,8 +70,9 @@ func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, 
 	}
 	if err := db.Add(a); err != nil {
 		log.Printf("Error inserting records: %s", err)
+		p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}})
 	}
-	p.Send(cli.ProgressUpdater{Name: "Assessments", StatusMessage: fmt.Sprintf("Complete! Added [%d records] to [assessments]", len(a))})
+	p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", len(a))}})
 }
 
 // Get Deleted Assessments and remove from `assessments` table
@@ -75,14 +80,14 @@ func getDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time,
 	data := make(chan platts.Result[platts.SymbolCorrection])
 	client.GetDeletes(start, pageSize, data)
 	a := []platts.Assessment{}
+	p.Send(cli.StatusUpdater{Name: "Deletes", Status: cli.Status{Category: cli.INPROGRESS, Msg: "In Progress"}})
 
 	for result := range data {
 		if result.Err != nil {
 			log.Printf("Error! %s", result.Err)
 		} else {
 			res := result.Message
-			pu := cli.ProgressUpdater{Name: "Deletes", Percent: 1 / float64(res.Metadata.TotalPages)}
-			p.Send(pu)
+			p.Send(cli.ProgressUpdater{Name: "Deletes", Percent: 1 / float64(res.Metadata.TotalPages)})
 			log.Printf("Deletes: %d records received from page [%d] in [%s] (%d total records).",
 				len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
 
@@ -91,6 +96,7 @@ func getDeletes(client *platts.Client, db *MD.AssessmentsStore, start time.Time,
 	}
 	if err := db.Remove(a); err != nil {
 		log.Printf("Error removing records: %s", err)
+		p.Send(cli.StatusUpdater{Name: "Deletes", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}})
 	}
-	p.Send(cli.ProgressUpdater{Name: "Deletes", StatusMessage: fmt.Sprintf("Complete! Removed [%d records] from [assessments]", len(a))})
+	p.Send(cli.StatusUpdater{Name: "Deletes", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Removed [%d records] from [assessments]", len(a))}})
 }

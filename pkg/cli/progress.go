@@ -27,22 +27,40 @@ func NewProgram(title string, names []string) *tea.Program {
 
 var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("6266262")).Render
 
-// var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("6266262")).Render
-var ipStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("6266262")).Render
-var successStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("6266262")).Render
+var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Render
+var ipStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("202")).Render
+var successStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#04B575")).Render
 var titleStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).Foreground(lipgloss.Color("6266262")).Render
 
 type ProgressUpdater struct {
-	Name          string
-	Percent       float64
-	StatusMessage string
+	Name    string
+	Percent float64
+}
+
+type StatusUpdater struct {
+	Name   string
+	Status Status
+}
+
+type StatusCategory int
+
+const (
+	PENDING StatusCategory = iota
+	INPROGRESS
+	COMPLETED
+	ERROR
+)
+
+type Status struct {
+	Msg      string
+	Category StatusCategory
 }
 
 type progressWrapper struct {
-	name      string
-	percent   float64
-	statusMsg string
-	progress  progress.Model
+	name     string
+	percent  float64
+	status   Status
+	progress progress.Model
 }
 
 type model struct {
@@ -63,7 +81,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for i := range m.progress {
 			if m.progress[i].name == msg.Name {
 				m.progress[i].percent += msg.Percent
-				m.progress[i].statusMsg = msg.StatusMessage
+				break
+			}
+		}
+		return m, nil
+	case StatusUpdater:
+		for i := range m.progress {
+			if m.progress[i].name == msg.Name {
+				m.progress[i].status = msg.Status
 				break
 			}
 		}
@@ -79,7 +104,7 @@ func (m model) View() string {
 	s := ""
 	s += "\n" + pad + titleStyle(m.title)
 	for _, v := range m.progress {
-		s += "\n" + pad + v.name + " - " + statusString(v.statusMsg)
+		s += "\n" + pad + v.name + ": " + statusString(v.status)
 		s += "\n" + pad + m.progress[0].progress.ViewAs(v.percent) + "\n"
 	}
 	s += "\n\n" + pad + helpStyle("press any key to quit")
@@ -87,11 +112,17 @@ func (m model) View() string {
 
 }
 
-func statusString(msg string) string {
-	switch msg {
-	case "":
-		return ipStyle("In Progress")
+func statusString(status Status) string {
+	switch status.Category {
+	case ERROR:
+		return errorStyle(status.Msg)
+	case INPROGRESS:
+		return ipStyle(status.Msg)
+	case COMPLETED:
+		return successStyle(status.Msg)
+	case PENDING:
+		return status.Msg
 	default:
-		return successStyle(msg)
+		return "Pending"
 	}
 }
