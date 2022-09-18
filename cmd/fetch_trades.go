@@ -25,16 +25,10 @@ var tradeCmd = &cobra.Command{
 		db := TD.NewDb("database.db")
 		tds := TD.NewTradeDataStore(db)
 
-		// initial parameters
-		start, err := time.Parse("2006-01-02T15:04:05", viper.GetString("startDate"))
-		if err != nil {
-			log.Fatal("Could not parse time: ", err)
-		}
-
 		p := cli.NewProgram("test", []string{"Trades"})
 
 		go func() {
-			GetTrades(client, tds, start, 1000, p)
+			GetTrades(client, tds, startDate, 1000, p)
 		}()
 		p.Start()
 	},

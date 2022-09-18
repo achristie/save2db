@@ -18,7 +18,6 @@ var symCmd = &cobra.Command{
 	Use:   "symbols",
 	Short: "Fetch Symbol Reference Data",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Printf("%s, %s", viper.GetString("startDate"), viper.GetString("mdc"))
 		// create a platts api client
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
@@ -26,16 +25,10 @@ var symCmd = &cobra.Command{
 		db := MD.NewDb("database2.db")
 		ss := MD.NewSymbolStore(db)
 
-		// initial parameters
-		start, err := time.Parse("2006-01-02T15:04:05", viper.GetString("startDate"))
-		if err != nil {
-			log.Fatal("Could not parse time: ", err)
-		}
-
-		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", viper.GetString("mdc"), start), []string{"Symbols"})
+		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, startDate), []string{"Symbols"})
 
 		go func() {
-			getReferenceData(client, ss, start, viper.GetString("mdc"), 1000, p)
+			getReferenceData(client, ss, startDate, mdc, 1000, p)
 		}()
 		p.Start()
 	},
@@ -43,9 +36,6 @@ var symCmd = &cobra.Command{
 
 func init() {
 	fetchCmd.AddCommand(symCmd)
-	// a := &config{}
-	// viper.Unmarshal(a)
-	// log.Printf("%v", a)
 }
 
 // Get Reference Data and put into `symbols` table

@@ -47,7 +47,7 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
 	// req.Close = true
 	u, _ := url.QueryUnescape(req.URL.String())
-	// log.Printf("platts: Fetching [%s]" u) // make this a debug level log!
+	log.Printf("platts: Fetching [%s]", u) // make this a debug level log!
 	res, err := c.c.Do(req)
 	if err != nil {
 		return nil, err

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -34,6 +35,23 @@ func (c *Client) GetHistory(StartTime time.Time, PageSize int, ch chan Result[Sy
 	params.Add("pagesize", strconv.Itoa(min(10000, PageSize))) // max is 10k
 
 	req, err := c.newRequest("market-data/v3/value/history/", params)
+	if err != nil {
+		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
+	}
+
+	go func() {
+		var result SymbolHistory
+		getConcurrently(c, req, ch, result)
+	}()
+}
+
+func (c *Client) GetHistoryBySymbol(symbol []string, startTime time.Time, PageSize int, ch chan Result[SymbolHistory]) {
+	params := url.Values{}
+	params.Add("filter", fmt.Sprintf("symbol IN (%s) AND modDate >= %q", "\""+strings.Join(symbol, "\", \"")+"\"", startTime.Format("2006-01-02T15:04:05")))
+	params.Add("sort", "modDate: asc")                         // important for paging properly
+	params.Add("pagesize", strconv.Itoa(min(10000, PageSize))) // max is 10k
+
+	req, err := c.newRequest("market-data/v3/value/history/symbol", params)
 	if err != nil {
 		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
 	}

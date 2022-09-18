@@ -19,7 +19,6 @@ var faCmd = &cobra.Command{
 	Use:   "assessments",
 	Short: "Assessment Data (Prices, Volumes, etc..)",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// create a platts api client
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
@@ -27,17 +26,11 @@ var faCmd = &cobra.Command{
 		db := MD.NewDb("database2.db")
 		as := MD.NewAssessmentsStore(db)
 
-		// initial parameters
-		start, err := time.Parse("2006-01-02T15:04:05", viper.GetString("startDate"))
-		if err != nil {
-			log.Fatal("Could not parse time: ", err)
-		}
-
-		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", viper.GetString("mdc"), start), []string{"Assessments", "Deletes"})
+		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
 
 		go func() {
-			getAssessments(client, as, viper.GetString("mdc"), start, 10000, p)
-			getDeletes(client, as, start, 10000, p)
+			getAssessments(client, as, mdc, symbols, startDate, 10000, p)
+			getDeletes(client, as, startDate, 10000, p)
 		}()
 		p.Start()
 	},
@@ -47,9 +40,13 @@ func init() {
 	fetchCmd.AddCommand(faCmd)
 }
 
-func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, start time.Time, pageSize int, p *tea.Program) {
+func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, symbols []string, start time.Time, pageSize int, p *tea.Program) {
 	data := make(chan platts.Result[platts.SymbolHistory])
-	client.GetHistoryByMDC(MDC, start, pageSize, data)
+	if len(symbols) > 0 {
+		client.GetHistoryBySymbol(symbols, start, pageSize, data)
+	} else {
+		client.GetHistoryByMDC(MDC, start, pageSize, data)
+	}
 	a := []platts.Assessment{}
 	p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.INPROGRESS, Msg: "In Progress"}})
 
