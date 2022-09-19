@@ -120,7 +120,7 @@ func NewTradeDataStore(db *sql.DB) *TradeDataStore {
 }
 
 // Add Reference Data to DB
-func (r *TradeDataStore) Add(data platts.TradeData) error {
+func (r *TradeDataStore) Add(data []platts.TradeResults) error {
 
 	query, err := r.database.Prepare(trade_insert)
 	if err != nil {
@@ -133,7 +133,7 @@ func (r *TradeDataStore) Add(data platts.TradeData) error {
 		return err
 	}
 
-	for _, r := range data.Results {
+	for _, r := range data {
 
 		// convert Markets to json
 		mkts, err := json.Marshal(&r.Markets)

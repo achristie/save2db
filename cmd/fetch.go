@@ -31,6 +31,7 @@ var (
 	startDate time.Time
 	mdc       string
 	symbols   []string
+	markets   []string
 )
 
 func init() {
@@ -47,6 +48,7 @@ func init() {
 	fetchCmd.PersistentFlags().StringVar(&mdc, "mdc", "", "Which Market Data Category to use")
 	fetchCmd.PersistentFlags().StringSliceVarP(&symbols, "symbol", "s", nil, "Which Market Data Category to use")
 	fetchCmd.PersistentFlags().StringVarP(&start, "startDate", "t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get updates since. modDate >= t")
+	fetchCmd.PersistentFlags().StringSliceVarP(&markets, "markets", "m", nil, "The list of Markets to use for eWMD")
 
 	rootCmd.AddCommand(fetchCmd)
 }

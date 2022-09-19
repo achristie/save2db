@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	MD "github.com/achristie/save2db/internal/market_data"
@@ -46,7 +47,9 @@ func getReferenceData(client *platts.Client, db *MD.SymbolStore, start time.Time
 
 	for result := range data {
 		if result.Err != nil {
-			log.Printf("Error! %s", result.Err)
+			log.Printf("Error - Reference Data:  %s", result.Err)
+			p.Send(cli.StatusUpdater{Name: "Symbols", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}})
+			os.Exit(1)
 		} else {
 			res := result.Message
 			pu := cli.ProgressUpdater{Name: "Symbols", Percent: 1 / float64(res.Metadata.TotalPages)}
@@ -62,6 +65,7 @@ func getReferenceData(client *platts.Client, db *MD.SymbolStore, start time.Time
 
 	if err := db.Add(sr); err != nil {
 		log.Printf("Error inserting records: %s", err)
+		p.Send(cli.StatusUpdater{Name: "Symbols", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}})
 	}
-	fmt.Printf("Added [%d records] to [symbols]", len(sr))
+	p.Send(cli.StatusUpdater{Name: "Symbols", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [symbols]", len(sr))}})
 }
