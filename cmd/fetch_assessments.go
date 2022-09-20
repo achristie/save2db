@@ -17,7 +17,9 @@ import (
 
 var faCmd = &cobra.Command{
 	Use:   "assessments",
-	Short: "Assessment Data (Prices, Volumes, etc..)",
+	Short: "Fetch assessment data",
+	Long: `Fetch assessments either by MDC (Market Data category) or Symbol(s) since t
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// create a platts api client
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))

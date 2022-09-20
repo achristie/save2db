@@ -52,6 +52,7 @@ var configureCmd = &cobra.Command{
 		viper.Set("apikey", apikey)
 		viper.WriteConfig()
 		fmt.Printf("Looks Good! Saved to config file [%s]", viper.ConfigFileUsed())
+		fmt.Println("\nYou can now run the `fetch` command!")
 
 	},
 }

@@ -18,7 +18,7 @@ import (
 
 var tradeCmd = &cobra.Command{
 	Use:   "trades",
-	Short: "Fetch Trade Data (eWindow Market Data)",
+	Short: "Fetch trade data (eWindow Market Data)",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// create a platts api client

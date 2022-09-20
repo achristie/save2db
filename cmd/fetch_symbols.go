@@ -17,7 +17,7 @@ import (
 
 var symCmd = &cobra.Command{
 	Use:   "symbols",
-	Short: "Fetch Symbol Reference Data",
+	Short: "Fetch symbol reference data",
 	Run: func(cmd *cobra.Command, args []string) {
 		// create a platts api client
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))

@@ -37,7 +37,8 @@ func initConfig() {
 	// create if the config does not yet exists
 	os.OpenFile(fmt.Sprintf("%s/%s", home, configName), os.O_CREATE|os.O_RDONLY, 0666)
 
-	viper.AutomaticEnv()
+	// problematic to use env variables
+	// viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
 	if err != nil {
