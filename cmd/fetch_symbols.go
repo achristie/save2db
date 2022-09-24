@@ -11,7 +11,6 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
 )
 
@@ -19,19 +18,19 @@ var symCmd = &cobra.Command{
 	Use:   "symbols",
 	Short: "Fetch symbol reference data",
 	Run: func(cmd *cobra.Command, args []string) {
-		// create a platts api client
-		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
+		// // create a platts api client
+		// client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
-		// initialize DB and create necessary tables
-		db := MD.NewDb("database2.db")
-		ss := MD.NewSymbolStore(db)
+		// // initialize DB and create necessary tables
+		// db := MD.NewDb("database2.db")
+		// ss := MD.NewSymbolStore(db)
 
-		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, startDate), []string{"Symbols"})
+		// p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, startDate), []string{"Symbols"})
 
-		go func() {
-			getReferenceData(client, ss, startDate, mdc, 1000, p)
-		}()
-		p.Start()
+		// go func() {
+		// 	getReferenceData(client, ss, startDate, mdc, 1000, p)
+		// }()
+		// p.Start()
 	},
 }
 

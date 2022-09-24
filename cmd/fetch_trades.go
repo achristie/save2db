@@ -25,7 +25,7 @@ var tradeCmd = &cobra.Command{
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
 		// initialize DB and create necessary tables
-		db := TD.NewDb("database.db")
+		db := TD.NewDb("database3.db")
 		tds := TD.NewTradeDataStore(db)
 
 		p := cli.NewProgram(fmt.Sprintf("Markets: %s, Modified Date >= [%s]", strings.Join(markets, ", "), start), []string{"Trades"})

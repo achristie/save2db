@@ -11,7 +11,6 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
 )
 
@@ -21,25 +20,25 @@ var faCmd = &cobra.Command{
 	Long: `Fetch assessments either by MDC (Market Data category) or Symbol(s) since t
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// create a platts api client
-		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
+		// // create a platts api client
+		// client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
-		// initialize DB and create necessary tables
-		db := MD.NewDb("database2.db")
-		as := MD.NewAssessmentsStore(db)
+		// // initialize DB and create necessary tables
+		// // db := MD.NewDb("database2.db")
+		// as := MD.NewAssessmentsStore(db)
 
-		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
+		// p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
 
-		go func() {
-			getAssessments(client, as, mdc, symbols, startDate, 10000, p)
-			getDeletes(client, as, startDate, 10000, p)
-		}()
-		p.Start()
+		// go func() {
+		// 	getAssessments(client, as, mdc, symbols, startDate, 10000, p)
+		// 	getDeletes(client, as, startDate, 10000, p)
+		// }()
+		// p.Start()
 	},
 }
 
 func init() {
-	fetchCmd.AddCommand(faCmd)
+	// fetchCmd.AddCommand(faCmd)
 }
 
 func getAssessments(client *platts.Client, db *MD.AssessmentsStore, MDC string, symbols []string, start time.Time, pageSize int, p *tea.Program) {
