@@ -9,6 +9,10 @@ CREATE TABLE
     PRIMARY KEY (symbol, bate, assessed_date)
   );
 
+CREATE INDEX assessments_ad ON assessments (assessed_date);
+
+CREATE INDEX assessments_bate ON assessments (bate);
+
 CREATE TABLE
   IF NOT EXISTS symbols (
     symbol TEXT NOT NULL PRIMARY KEY,

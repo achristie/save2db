@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"sort"
 
 	_ "modernc.org/sqlite"
@@ -36,12 +37,16 @@ func (db *DB) Open() (err error) {
 		return fmt.Errorf("datasource required")
 	}
 
-	file, err := os.OpenFile(db.source, os.O_RDWR|os.O_CREATE, 0666)
-	if err != nil {
+	// file, err := os.OpenFile(db.source, os.O_RDWR|os.O_CREATE, 0666)
+	// if err != nil {
+	// 	return err
+	// }
+
+	if err := os.MkdirAll(filepath.Dir(db.source), 0700); err != nil {
 		return err
 	}
 
-	if db.db, err = sql.Open("sqlite", file.Name()); err != nil {
+	if db.db, err = sql.Open("sqlite", db.source); err != nil {
 		return err
 	}
 
@@ -101,4 +106,22 @@ func (db *DB) migrateFile(name string) error {
 	}
 
 	return tx.Commit()
+}
+
+type Tx struct {
+	*sql.Tx
+	db *DB
+}
+
+func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
+	tx, err := db.db.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return wrapper Tx
+	return &Tx{
+		Tx: tx,
+		db: db,
+	}, nil
 }
