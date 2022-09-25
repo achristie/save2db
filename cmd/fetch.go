@@ -42,6 +42,7 @@ var (
 	mdc       string
 	symbols   []string
 	markets   []string
+	csv       bool
 )
 
 func init() {
@@ -62,6 +63,7 @@ func init() {
 	fetchCmd.PersistentFlags().StringVarP(&start, "startDate", "t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get assessments since t. Ex. 2021-01-01T00:00:00")
 
 	fetchCmd.PersistentFlags().StringSliceVarP(&markets, "markets", "m", nil, "Markets to get Trades for. Ex: 'EU BFOE, US Midwest'")
+	fetchCmd.PersistentFlags().BoolVar(&csv, "csv", false, "Flag to indicate whether to generate a csv file instead of saving to a database")
 
 	rootCmd.AddCommand(fetchCmd)
 }

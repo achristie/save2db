@@ -107,7 +107,7 @@ func (m model) View() string {
 		s += "\n" + pad + v.name + ": " + statusString(v.status)
 		s += "\n" + pad + m.progress[0].progress.ViewAs(v.percent) + "\n"
 	}
-	s += "\n\n" + pad + helpStyle("press any key to quit")
+	s += "\n\n" + pad + helpStyle("errror!")
 	return s
 
 }

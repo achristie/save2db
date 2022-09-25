@@ -72,7 +72,8 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Result[T], result T) {
 	if _, err := c.do(req, &result); err != nil {
 		// If first request fails then abort
-		log.Fatalf("Could not make first request: %s", err)
+		ch <- Result[T]{result, err}
+		// log.Fatalf("Could not make first request: %s", err)
 	}
 	ch <- Result[T]{result, nil}
 

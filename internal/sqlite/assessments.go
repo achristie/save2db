@@ -41,29 +41,13 @@ func NewAssessmentsService(ctx context.Context, db *DB) (*AssessmentsService, er
 	return &as, nil
 }
 
-// // Remove deleted records from the DB
-// func (m *AssessmentsStore) Remove(records []platts.Assessment) error {
-// 	query, err := m.database.Prepare(del)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer query.Close()
-
-// 	// bulk delete
-// 	tx, err := m.database.Begin()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	for _, r := range records {
-// 		_, err := tx.Stmt(query).Exec(r.Symbol, r.Bate, r.AssessDate)
-// 		if err != nil {
-// 			tx.Rollback()
-// 			return err
-// 		}
-// 	}
-// 	return tx.Commit()
-// }
+func (s *AssessmentsService) Remove(ctx context.Context, tx *Tx, record platts.Assessment) (sql.Result, error) {
+	res, err := tx.StmtContext(ctx, s.delete).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
 
 func (s *AssessmentsService) Add(ctx context.Context, tx *Tx, record platts.Assessment) (sql.Result, error) {
 	res, err := tx.StmtContext(ctx, s.insert).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
@@ -72,27 +56,3 @@ func (s *AssessmentsService) Add(ctx context.Context, tx *Tx, record platts.Asse
 	}
 	return res, nil
 }
-
-// Add Assessments
-// func (m *AssessmentsStore) Add(ctx context.Context, records []platts.Assessment) error {
-// 	query, err := m.database.Prepare(ins)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer query.Close()
-
-// 	// bulk insert
-// 	tx, err := m.database.Begin()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	for _, r := range records {
-// 		_, err := tx.Stmt(query).Exec(r.Symbol, r.Bate, r.Value, r.AssessDate, r.ModDate, r.IsCorrected)
-// 		if err != nil {
-// 			tx.Rollback()
-// 			return err
-// 		}
-// 	}
-// 	return tx.Commit()
-// }
