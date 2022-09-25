@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/cli"
 	"github.com/achristie/save2db/pkg/platts"
+	"github.com/achristie/save2db/sqlite"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -54,7 +54,7 @@ var faCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// initialize tui
+		// initialize TUI
 		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
 
 		// initialize Channel
@@ -92,25 +92,23 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 }
 
 func (m *Main) writeAssessments(ctx context.Context) {
-	su_error := cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: "An error occured, please retry."}}
 	count := 0
 
 	for result := range m.ch {
 		if result.Err != nil {
-			log.Printf("Error! %s", result.Err)
-			m.p.Send(su_error)
+			log.Printf("fetch: %s", result.Err)
+			m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: fmt.Sprint(result.Err)}})
 			m.p.Quit()
 		}
+
 		res := result.Message
 		m.p.Send(cli.ProgressUpdater{Name: "Assessments", Percent: 1 / float64(res.Metadata.TotalPages)})
-		// log.Printf("Assessment Data: %d records received from page [%d] in [%s] (%d total records).",
-		// 	len(res.Results), res.Metadata.Page, res.Metadata.QueryTime, res.Metadata.Count)
 
 		for _, r := range res.Flatten() {
 			_, err := m.assessmentService.Add(ctx, m.tx, r)
 			if err != nil {
-				log.Printf("Error inserting records: %s", err)
-				m.p.Send(su_error)
+				log.Printf("write: %s", err)
+				m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: fmt.Sprint(err)}})
 				m.p.Quit()
 			}
 			count += 1
@@ -120,6 +118,10 @@ func (m *Main) writeAssessments(ctx context.Context) {
 	m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
 	m.tx.Commit()
 	m.p.Quit()
+}
+
+func (m *Main) writeAssessmentsToCSV(ctx context.Context) {
+
 }
 
 // Get Deleted Assessments and remove from `assessments` table
