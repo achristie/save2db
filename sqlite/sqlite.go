@@ -18,35 +18,30 @@ var migrationFS embed.FS
 
 type DB struct {
 	db     *sql.DB
-	ctx    context.Context
-	cancel func()
-	source string
+	Ctx    context.Context
+	Cancel func()
+	Source string
 }
 
 // Simple for now..
-func NewDB(source string) *DB {
-	db := &DB{
-		source: source,
-	}
-	db.ctx, db.cancel = context.WithCancel(context.Background())
-	return db
-}
+// func NewDB(source string) *DB {
+// 	db := &DB{
+// 		source: source,
+// 	}
+// 	db.ctx, db.cancel = context.WithCancel(context.Background())
+// 	return db
+// }
 
 func (db *DB) Open() (err error) {
-	if db.source == "" {
+	if db.Source == "" {
 		return fmt.Errorf("datasource required")
 	}
 
-	// file, err := os.OpenFile(db.source, os.O_RDWR|os.O_CREATE, 0666)
-	// if err != nil {
-	// 	return err
-	// }
-
-	if err := os.MkdirAll(filepath.Dir(db.source), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(db.Source), 0700); err != nil {
 		return err
 	}
 
-	if db.db, err = sql.Open("sqlite", db.source); err != nil {
+	if db.db, err = sql.Open("sqlite", db.Source); err != nil {
 		return err
 	}
 
@@ -108,20 +103,11 @@ func (db *DB) migrateFile(name string) error {
 	return tx.Commit()
 }
 
-type Tx struct {
-	*sql.Tx
-	db *DB
-}
-
-func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
+func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
 	tx, err := db.db.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	// Return wrapper Tx
-	return &Tx{
-		Tx: tx,
-		db: db,
-	}, nil
+	return tx, nil
 }

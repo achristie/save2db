@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"os"
 
+	"github.com/achristie/save2db/pkg/platts"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -45,4 +48,12 @@ func initConfig() {
 		fmt.Printf("unable to read config: %v", err)
 	}
 
+}
+
+type AssessmentsService interface {
+	Add(context.Context, *sql.Tx, platts.Assessment) (sql.Result, error)
+	Remove(context.Context, *sql.Tx, platts.Assessment) (sql.Result, error)
+}
+type DbWrapper interface {
+	Open() error
 }

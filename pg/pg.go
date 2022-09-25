@@ -13,23 +13,23 @@ import (
 var migrationFS embed.FS
 
 type DB struct {
-	db     *sql.DB
-	ctx    context.Context
-	cancel func()
-	source string
+	Db     *sql.DB
+	Ctx    context.Context
+	Cancel func()
+	Source string
 }
 
-func NewDB(source string) *DB {
-	db := &DB{source: source}
-	db.ctx, db.cancel = context.WithCancel(context.Background())
-	return db
-}
+// func NewDB(source string) *DB {
+// 	db := &DB{source: source}
+// 	db.ctx, db.cancel = context.WithCancel(context.Background())
+// 	return db
+// }
 
 func (db *DB) Open() (err error) {
-	if db.source == "" {
+	if db.Source == "" {
 		return fmt.Errorf("datasource required")
 	}
-	if db.db, err = sql.Open("pgx", db.source); err != nil {
+	if db.Db, err = sql.Open("pgx", db.Source); err != nil {
 		return err
 	}
 
@@ -41,7 +41,7 @@ func (db *DB) Open() (err error) {
 }
 
 func (db *DB) migrate() error {
-	if _, err := db.db.Exec(`CREATE TABLE IF NOT EXISTS migrations (name CHAR(18) PRIMARY KEY);`); err != nil {
+	if _, err := db.Db.Exec(`CREATE TABLE IF NOT EXISTS migrations (name CHAR(18) PRIMARY KEY);`); err != nil {
 		return fmt.Errorf("cannot create migrations table: %w", err)
 	}
 
@@ -61,7 +61,7 @@ func (db *DB) migrate() error {
 }
 
 func (db *DB) migrateFile(name string) error {
-	tx, err := db.db.Begin()
+	tx, err := db.Db.Begin()
 	if err != nil {
 		return err
 	}
@@ -87,20 +87,11 @@ func (db *DB) migrateFile(name string) error {
 	return tx.Commit()
 }
 
-type Tx struct {
-	*sql.Tx
-	db *DB
-}
-
-func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
-	tx, err := db.db.BeginTx(ctx, opts)
+func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
+	tx, err := db.Db.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	// Return wrapper Tx
-	return &Tx{
-		Tx: tx,
-		db: db,
-	}, nil
+	return tx, nil
 }

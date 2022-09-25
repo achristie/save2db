@@ -2,15 +2,18 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/achristie/save2db/database"
 	"github.com/achristie/save2db/pkg/cli"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/sqlite"
+	"github.com/achristie/save2db/services"
 	tea "github.com/charmbracelet/bubbletea"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
@@ -18,10 +21,9 @@ import (
 
 type Main struct {
 	client            *platts.Client
-	tx                *sqlite.Tx
+	tx                *sql.Tx
 	p                 *tea.Program
-	db                *sqlite.DB
-	assessmentService *sqlite.AssessmentsService
+	assessmentService AssessmentsService
 	ch                chan platts.Result[platts.SymbolHistory]
 }
 
@@ -35,7 +37,8 @@ var faCmd = &cobra.Command{
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
 
 		// initialize DB
-		db := sqlite.NewDB("awc_database.db")
+		// database := db.NewSqliteDB("database.db")
+		db := database.NewPgDB("postgres://postgres:password@localhost:5432/testdb")
 		if err := db.Open(); err != nil {
 			fmt.Print(err)
 			os.Exit(1)
@@ -48,7 +51,7 @@ var faCmd = &cobra.Command{
 		}
 
 		// initialize assessments service
-		as, err := sqlite.NewAssessmentsService(ctx, db)
+		as, err := services.NewAssessmentsService(ctx, db.Db)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
@@ -61,7 +64,6 @@ var faCmd = &cobra.Command{
 		ch := make(chan platts.Result[platts.SymbolHistory])
 
 		main := Main{client: client,
-			db:                db,
 			tx:                tx,
 			p:                 p,
 			assessmentService: as,
@@ -118,10 +120,6 @@ func (m *Main) writeAssessments(ctx context.Context) {
 	m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
 	m.tx.Commit()
 	m.p.Quit()
-}
-
-func (m *Main) writeAssessmentsToCSV(ctx context.Context) {
-
 }
 
 // Get Deleted Assessments and remove from `assessments` table
