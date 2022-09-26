@@ -34,10 +34,6 @@ func getPreparedStmts(s string) string {
 
 }
 
-type DbWrapper interface {
-	PrepareContext(context.Context, string) (*sql.Stmt, error)
-}
-
 func NewAssessmentsService(ctx context.Context, db *sql.DB) (*AssessmentsService, error) {
 	s := getPreparedStmts("pg")
 	insert, err := db.PrepareContext(ctx, s)

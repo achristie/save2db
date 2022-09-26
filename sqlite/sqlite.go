@@ -18,30 +18,34 @@ var migrationFS embed.FS
 
 type DB struct {
 	db     *sql.DB
-	Ctx    context.Context
-	Cancel func()
-	Source string
+	ctx    context.Context
+	cancel func()
+	source string
+}
+
+func (db *DB) GetDB() *sql.DB {
+	return db.db
 }
 
 // Simple for now..
-// func NewDB(source string) *DB {
-// 	db := &DB{
-// 		source: source,
-// 	}
-// 	db.ctx, db.cancel = context.WithCancel(context.Background())
-// 	return db
-// }
+func NewDB(source string) *DB {
+	db := &DB{
+		source: source,
+	}
+	db.ctx, db.cancel = context.WithCancel(context.Background())
+	return db
+}
 
 func (db *DB) Open() (err error) {
-	if db.Source == "" {
+	if db.source == "" {
 		return fmt.Errorf("datasource required")
 	}
 
-	if err := os.MkdirAll(filepath.Dir(db.Source), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(db.source), 0700); err != nil {
 		return err
 	}
 
-	if db.db, err = sql.Open("sqlite", db.Source); err != nil {
+	if db.db, err = sql.Open("sqlite", db.source); err != nil {
 		return err
 	}
 

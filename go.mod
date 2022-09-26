@@ -5,7 +5,8 @@ go 1.19
 require modernc.org/sqlite v1.18.1
 
 require (
-	github.com/charmbracelet/bubbles v0.13.0 // indirect
+	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/charmbracelet/bubbles v0.14.0 // indirect
 	github.com/charmbracelet/bubbletea v0.22.1 // indirect
 	github.com/charmbracelet/harmonica v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v0.5.0 // indirect

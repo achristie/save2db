@@ -8,10 +8,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/achristie/save2db/database"
-	"github.com/achristie/save2db/pkg/cli"
+	"github.com/achristie/save2db/pg"
 	"github.com/achristie/save2db/pkg/platts"
+	tui "github.com/achristie/save2db/pkg/tui/progress"
 	"github.com/achristie/save2db/services"
+	"github.com/achristie/save2db/sqlite"
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/cobra"
@@ -23,7 +24,7 @@ type Main struct {
 	client            *platts.Client
 	tx                *sql.Tx
 	p                 *tea.Program
-	assessmentService AssessmentsService
+	assessmentService *services.AssessmentsService
 	ch                chan platts.Result[platts.SymbolHistory]
 }
 
@@ -35,10 +36,15 @@ var faCmd = &cobra.Command{
 		// create a platts api client
 		ctx := context.Background()
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
+		k := false
+		var db Database
 
-		// initialize DB
-		// database := db.NewSqliteDB("database.db")
-		db := database.NewPgDB("postgres://postgres:password@localhost:5432/testdb")
+		if k {
+			db = sqlite.NewDB("database3.db")
+		} else {
+			db = pg.NewDB("postgres://postgres:password@localhost:5432/postgres")
+		}
+
 		if err := db.Open(); err != nil {
 			fmt.Print(err)
 			os.Exit(1)
@@ -51,14 +57,14 @@ var faCmd = &cobra.Command{
 		}
 
 		// initialize assessments service
-		as, err := services.NewAssessmentsService(ctx, db.Db)
+		as, err := services.NewAssessmentsService(ctx, db.GetDB())
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
 		}
 
 		// initialize TUI
-		p := cli.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
+		p := tui.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Assessments", "Deletes"})
 
 		// initialize Channel
 		ch := make(chan platts.Result[platts.SymbolHistory])
@@ -90,7 +96,7 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 	} else {
 		m.client.GetHistoryByMDC(mdc, start, 10000, m.ch)
 	}
-	m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.INPROGRESS, Msg: "In Progress"}})
+	m.p.Send(tui.StatusUpdater{Name: "Assessments", Status: tui.Status{Category: tui.INPROGRESS, Msg: "In Progress"}})
 }
 
 func (m *Main) writeAssessments(ctx context.Context) {
@@ -99,25 +105,25 @@ func (m *Main) writeAssessments(ctx context.Context) {
 	for result := range m.ch {
 		if result.Err != nil {
 			log.Printf("fetch: %s", result.Err)
-			m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: fmt.Sprint(result.Err)}})
+			m.p.Send(tui.StatusUpdater{Name: "Assessments", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(result.Err)}})
 			m.p.Quit()
 		}
 
 		res := result.Message
-		m.p.Send(cli.ProgressUpdater{Name: "Assessments", Percent: 1 / float64(res.Metadata.TotalPages)})
+		m.p.Send(tui.ProgressUpdater{Name: "Assessments", Percent: 1 / float64(res.Metadata.TotalPages)})
 
 		for _, r := range res.Flatten() {
 			_, err := m.assessmentService.Add(ctx, m.tx, r)
 			if err != nil {
 				log.Printf("write: %s", err)
-				m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.ERROR, Msg: fmt.Sprint(err)}})
+				m.p.Send(tui.StatusUpdater{Name: "Assessments", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(err)}})
 				m.p.Quit()
 			}
 			count += 1
 		}
 	}
 
-	m.p.Send(cli.StatusUpdater{Name: "Assessments", Status: cli.Status{Category: cli.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
+	m.p.Send(tui.StatusUpdater{Name: "Assessments", Status: tui.Status{Category: tui.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
 	m.tx.Commit()
 	m.p.Quit()
 }
