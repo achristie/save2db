@@ -1,4 +1,4 @@
-package configure
+package input
 
 import (
 	"fmt"
@@ -25,9 +25,9 @@ type model struct {
 	inputs     []textinput.Model
 }
 
-func initialModel() model {
+func NewConfigureDBModel() model {
 	m := model{
-		inputs: make([]textinput.Model, 3),
+		inputs: make([]textinput.Model, 5),
 	}
 
 	var t textinput.Model
@@ -35,20 +35,28 @@ func initialModel() model {
 		t = textinput.New()
 		t.CursorStyle = cursorStyle
 		t.CharLimit = 32
-
 		switch i {
 		case 0:
-			t.Placeholder = "Nickname"
+			t.Placeholder = "Host"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 1:
-			t.Placeholder = "Email"
-			t.CharLimit = 64
+			t.Placeholder = "Port"
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
 		case 2:
+			t.Placeholder = "Username"
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
+		case 3:
 			t.Placeholder = "Password"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
+		case 4:
+			t.Placeholder = "DB Name"
+			t.PromptStyle = focusedStyle
+			t.TextStyle = focusedStyle
 		}
 
 		m.inputs[i] = t
@@ -147,9 +155,25 @@ func (m model) View() string {
 	return b.String()
 }
 
-func NewProgram() {
-	if err := tea.NewProgram(initialModel()).Start(); err != nil {
+func NewProgram(model model) {
+	if err := tea.NewProgram(model).Start(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}
 }
+
+// type MainModel struct {
+// 	state sessionState
+// 	list tea.Model
+// 	input tea.Model
+// }
+
+// func New() MainModel {
+// 	return MainModel{
+
+// 	}
+// }
+
+// func StartTea() {
+// 	m :=
+// }
