@@ -65,6 +65,15 @@ func NewConfigureDBModel() model {
 	return m
 }
 
+type BackMsg struct {
+}
+
+func backCmd() tea.Cmd {
+	return func() tea.Msg {
+		return BackMsg{}
+	}
+}
+
 func (m model) Init() tea.Cmd {
 	return textinput.Blink
 }
@@ -74,7 +83,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, backCmd()
 
 		// Set focus to next input
 		case "tab", "shift+tab", "enter", "up", "down":
@@ -161,19 +170,3 @@ func NewProgram(model model) {
 		os.Exit(1)
 	}
 }
-
-// type MainModel struct {
-// 	state sessionState
-// 	list tea.Model
-// 	input tea.Model
-// }
-
-// func New() MainModel {
-// 	return MainModel{
-
-// 	}
-// }
-
-// func StartTea() {
-// 	m :=
-// }

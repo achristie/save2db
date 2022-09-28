@@ -24,6 +24,16 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+type SelectMsg struct {
+	SelectedItem list.Item
+}
+
+func selectProjectCmd(si list.Item) tea.Cmd {
+	return func() tea.Msg {
+		return SelectMsg{SelectedItem: si}
+	}
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -31,7 +41,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		if msg.String() == "enter" {
-			m.list.SelectedItem()
+			// m.list.SelectedItem()
+			return m, selectProjectCmd(m.list.SelectedItem())
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
