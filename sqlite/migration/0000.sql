@@ -2,10 +2,10 @@ CREATE TABLE
   assessments (
     symbol TEXT NOT NULL,
     bate TEXT NOT NULL,
-    "value" NUM NOT NULL,
+    "value" REAL NOT NULL,
     assessed_date TEXT NOT NULL,
     modified_date TEXT NOT NULL,
-    is_corrected string NOT NULL,
+    is_corrected TEXT NOT NULL,
     PRIMARY KEY (symbol, bate, assessed_date)
   );
 

@@ -16,7 +16,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
 )
 
@@ -35,23 +34,16 @@ var faCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// create a platts api client
 		ctx := context.Background()
-		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
+		client := platts.NewClient(config.APIKey, config.Username, config.Password)
 		var db Database
 
-		selection := viper.GetString("DBSelection")
-
-		switch selection {
+		switch config.DBSelection {
 		case "POSTGRESQL":
-			conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", viper.GetString("DBUsername"), viper.GetString("DBPassword"),
-				viper.GetString("DBHost"), viper.GetString("DBPort"), viper.GetString("DBName"))
+			conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DBUsername, config.DBPassword,
+				config.DBHost, config.DBPort, config.DBName)
 			db = pg.NewDB(conn)
 		default:
-			path := viper.GetString("Path")
-			if len(path) == 0 {
-				path = "database.db"
-			}
-
-			db = sqlite.NewDB(path)
+			db = sqlite.NewDB(config.Path)
 		}
 
 		if err := db.Open(); err != nil {

@@ -35,7 +35,7 @@ func getPreparedStmts(s string) string {
 }
 
 func NewAssessmentsService(ctx context.Context, db *sql.DB) (*AssessmentsService, error) {
-	s := getPreparedStmts("pg")
+	s := getPreparedStmts("sqlite")
 	insert, err := db.PrepareContext(ctx, s)
 	if err != nil {
 		return nil, fmt.Errorf("insert statement: %w", err)

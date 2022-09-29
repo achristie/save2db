@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var config Config
 
 var rootCmd = &cobra.Command{
 	Use:              "platts-cli",
@@ -47,10 +50,35 @@ func initConfig() {
 		fmt.Printf("unable to read config: %v", err)
 	}
 
+	// set defaults
+	viper.SetDefault("Path", "database.db")
+	viper.SetDefault("DBSelection", "SQLite")
+
+	var result map[string]interface{}
+	if err := viper.Unmarshal(&result); err != nil {
+		fmt.Printf("decode map: %v", err)
+	}
+
+	if err := mapstructure.Decode(result, &config); err != nil {
+		fmt.Printf("decode config: %v", err)
+	}
 }
 
 type Database interface {
 	Open() error
 	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
 	GetDB() *sql.DB
+}
+
+type Config struct {
+	Username    string `mapstructure:"username"`
+	APIKey      string `mapstructure:"apikey"`
+	Password    string `mapstructure:"password"`
+	DBHost      string `mapstructure:"dbhost"`
+	DBPort      string `mapstructure:"dbport"`
+	DBSelection string `mapstructure:"dbselection"`
+	DBName      string `mapstructure:"dbname"`
+	DBUsername  string `mapstructure:"dbusername"`
+	DBPassword  string `mapstructure:"dbpassword"`
+	Path        string `mapstructure:"path"`
 }
