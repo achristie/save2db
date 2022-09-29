@@ -36,13 +36,22 @@ var faCmd = &cobra.Command{
 		// create a platts api client
 		ctx := context.Background()
 		client := platts.NewClient(viper.GetString("apikey"), viper.GetString("username"), viper.GetString("password"))
-		k := false
 		var db Database
 
-		if k {
-			db = sqlite.NewDB("database3.db")
-		} else {
-			db = pg.NewDB("postgres://postgres:password@localhost:5432/postgres")
+		selection := viper.GetString("DBSelection")
+
+		switch selection {
+		case "POSTGRESQL":
+			conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", viper.GetString("DBUsername"), viper.GetString("DBPassword"),
+				viper.GetString("DBHost"), viper.GetString("DBPort"), viper.GetString("DBName"))
+			db = pg.NewDB(conn)
+		default:
+			path := viper.GetString("Path")
+			if len(path) == 0 {
+				path = "database.db"
+			}
+
+			db = sqlite.NewDB(path)
 		}
 
 		if err := db.Open(); err != nil {

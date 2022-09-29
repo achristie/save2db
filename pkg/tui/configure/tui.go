@@ -4,6 +4,7 @@ import (
 	"github.com/achristie/save2db/pkg/tui/configure/input"
 	"github.com/achristie/save2db/pkg/tui/configure/listdbui"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/viper"
 )
 
 type state int
@@ -15,9 +16,10 @@ const (
 
 // MainModel the main model of the program; holds other models and bubbles
 type MainModel struct {
-	state  state
-	dblist tea.Model
-	input  tea.Model
+	state     state
+	dblist    tea.Model
+	input     tea.Model
+	selection string
 }
 
 // View return the text UI to be output to the terminal
@@ -34,7 +36,6 @@ func (m MainModel) View() string {
 func New() MainModel {
 	return MainModel{
 		state:  listView,
-		input:  input.NewConfigureDBModel(),
 		dblist: listdbui.New([]string{"SQLite", "PostgreSQL"}, "Select a Database"),
 	}
 }
@@ -47,11 +48,22 @@ func (m MainModel) Init() tea.Cmd {
 // Update handle IO and commands
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch msg.(type) {
+	switch msg := msg.(type) {
 	case input.BackMsg:
 		m.state = listView
+	case input.SubmitMsg:
+		for k, v := range msg.Values {
+			viper.Set(k, v)
+		}
+		viper.WriteConfig()
+		return m, tea.Quit
 	case listdbui.SelectMsg:
-		m.input = input.NewConfigureDBModel()
+		m.selection = msg.Title()
+		if m.selection == "SQLite" {
+			m.input = input.NewSQLiteModel()
+		} else {
+			m.input = input.NewConfigureDBModel()
+		}
 		m.state = inputView
 	}
 

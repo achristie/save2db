@@ -25,6 +25,21 @@ type model struct {
 	inputs     []textinput.Model
 }
 
+func NewSQLiteModel() model {
+	m := model{
+		inputs: make([]textinput.Model, 1),
+	}
+
+	t := textinput.New()
+	t.Placeholder = "Path"
+	t.Focus()
+	t.TextStyle = focusedStyle
+	t.PromptStyle = focusedStyle
+
+	m.inputs[0] = t
+	return m
+}
+
 func NewConfigureDBModel() model {
 	m := model{
 		inputs: make([]textinput.Model, 5),
@@ -37,24 +52,24 @@ func NewConfigureDBModel() model {
 		t.CharLimit = 32
 		switch i {
 		case 0:
-			t.Placeholder = "Host"
+			t.Placeholder = "DBHost"
 			t.Focus()
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 1:
-			t.Placeholder = "Port"
+			t.Placeholder = "DBPort"
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 2:
-			t.Placeholder = "Username"
+			t.Placeholder = "DBUsername"
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		case 3:
-			t.Placeholder = "Password"
+			t.Placeholder = "DBPassword"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
 		case 4:
-			t.Placeholder = "DB Name"
+			t.Placeholder = "DBName"
 			t.PromptStyle = focusedStyle
 			t.TextStyle = focusedStyle
 		}
@@ -65,12 +80,21 @@ func NewConfigureDBModel() model {
 	return m
 }
 
-type BackMsg struct {
-}
+type BackMsg struct{}
 
 func backCmd() tea.Cmd {
 	return func() tea.Msg {
 		return BackMsg{}
+	}
+}
+
+type SubmitMsg struct {
+	Values map[string]string
+}
+
+func submitCmd(values map[string]string) tea.Cmd {
+	return func() tea.Msg {
+		return SubmitMsg{Values: values}
 	}
 }
 
@@ -90,9 +114,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s := msg.String()
 
 			// Did the user press enter while the submit button was focused?
-			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				return m, tea.Quit
+				d := make(map[string]string)
+				for _, v := range m.inputs {
+					d[v.Placeholder] = v.Value()
+				}
+				return m, submitCmd(d)
 			}
 
 			// Cycle indexes
