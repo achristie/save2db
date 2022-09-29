@@ -1,4 +1,4 @@
-package listdbui
+package configure
 
 import (
 	"github.com/charmbracelet/bubbles/list"
@@ -16,11 +16,11 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
-type model struct {
+type listModel struct {
 	list list.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m listModel) Init() tea.Cmd {
 	return nil
 }
 
@@ -34,7 +34,7 @@ func selectProjectCmd(s item) tea.Cmd {
 	}
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" || msg.String() == "esc" {
@@ -54,16 +54,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m listModel) View() string {
 	return docStyle.Render(m.list.View())
 }
 
-func New(items []string, title string) tea.Model {
+func NewList(items []string, title string) tea.Model {
 	var l []list.Item
 	for _, s := range items {
 		l = append(l, item{title: s})
 	}
-	m := model{list: list.New(l, list.NewDefaultDelegate(), 0, 0)}
+	m := listModel{list: list.New(l, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = title
 	m.list.SetFilteringEnabled(false)
 	m.list.SetShowStatusBar(false)

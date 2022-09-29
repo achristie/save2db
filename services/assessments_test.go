@@ -20,7 +20,7 @@ func TestAssessmentsService_Add(t *testing.T) {
 
 		ctx := context.Background()
 
-		as, err := services.NewAssessmentsService(ctx, db.GetDB())
+		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -57,7 +57,7 @@ func TestAssessmentsService_Add(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		as, err := services.NewAssessmentsService(ctx, db.GetDB())
+		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,7 +86,7 @@ func TestAssessmentsService_Remove(t *testing.T) {
 
 		ctx := context.Background()
 
-		as, err := services.NewAssessmentsService(ctx, db.GetDB())
+		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
