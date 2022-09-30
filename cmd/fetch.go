@@ -1,12 +1,35 @@
 package cmd
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/achristie/save2db/pg"
 	"github.com/achristie/save2db/pkg/platts"
+	"github.com/achristie/save2db/services"
+	"github.com/achristie/save2db/sqlite"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+)
+
+type Main struct {
+	client            *platts.Client
+	tx                *sql.Tx
+	p                 *tea.Program
+	assessmentService *services.AssessmentsService
+	symbolService     *services.SymbolService
+	tradeService      *services.TradeService
+	chSymbolHistory   chan platts.Result[platts.SymbolHistory]
+	chSymbolData      chan platts.Result[platts.SymbolData]
+	chTradeData       chan platts.Result[platts.TradeData]
+}
+
+var (
+	main Main
+	db   Database
 )
 
 var fetchCmd = &cobra.Command{
@@ -29,11 +52,42 @@ var fetchCmd = &cobra.Command{
 			return fmt.Errorf("invalid credentials. Did you use the `configure` command?")
 		}
 
-		return nil
+		return InitDB()
+		// return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("dataset not available, %s", args)
 	},
+}
+
+// setup db stuff
+func InitDB() error {
+	ctx := context.Background()
+	client := platts.NewClient(config.APIKey, config.Username, config.Password)
+
+	switch config.DBSelection {
+	case "PostgreSQL":
+		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DBUsername, config.DBPassword,
+			config.DBHost, config.DBPort, config.DBName)
+		db = pg.NewDB(conn)
+	default:
+		db = sqlite.NewDB(config.Path)
+	}
+
+	if err := db.Open(); err != nil {
+		return fmt.Errorf("db open: %w", err)
+	}
+
+	// begin a transaction
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("db tx: %w", err)
+	}
+
+	main = Main{client: client,
+		tx: tx,
+	}
+	return nil
 }
 
 var (

@@ -1,5 +1,5 @@
 CREATE TABLE
-  assessments (
+  IF NOT EXISTS assessments (
     symbol TEXT NOT NULL,
     bate TEXT NOT NULL,
     "value" REAL NOT NULL,
@@ -110,4 +110,4 @@ CREATE TABLE
     order_state_detail TEXT
   );
 
-CREATE INDEX trades_product_idx ON trades (product);
+CREATE INDEX plt_trades_product_idx ON trades (product);

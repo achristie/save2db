@@ -1,0 +1,51 @@
+INSERT
+INTO symbols (
+  symbol,
+  assessment_frequency,
+  commodity,
+  contract_type,
+  description,
+  publication_frequency_code,
+  currency,
+  quotation_style,
+  delivery_region,
+  delivery_region_basis,
+  settlement_type,
+  active,
+  TIMESTAMP,
+  uom,
+  day_of_publication,
+  shipping_terms,
+  standard_lot_size,
+  commodity_grade,
+  standard_lot_units,
+  decimal_places,
+  mdc,
+  bates
+)
+VALUES
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19,
+    $20,
+    $21,
+    $22
+  )
+  ON CONFLICT (symbol) DO NOTHING;
