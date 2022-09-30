@@ -16,15 +16,16 @@ import (
 )
 
 type Main struct {
-	client            *platts.Client
-	tx                *sql.Tx
-	p                 *tea.Program
-	assessmentService *services.AssessmentsService
-	symbolService     *services.SymbolService
-	tradeService      *services.TradeService
-	chSymbolHistory   chan platts.Result[platts.SymbolHistory]
-	chSymbolData      chan platts.Result[platts.SymbolData]
-	chTradeData       chan platts.Result[platts.TradeData]
+	client             *platts.Client
+	tx                 *sql.Tx
+	p                  *tea.Program
+	assessmentService  *services.AssessmentsService
+	symbolService      *services.SymbolService
+	tradeService       *services.TradeService
+	chSymbolHistory    chan platts.Result[platts.SymbolHistory]
+	chSymbolData       chan platts.Result[platts.SymbolData]
+	chTradeData        chan platts.Result[platts.TradeData]
+	chSymbolCorrection chan platts.Result[platts.SymbolCorrection]
 }
 
 var (
