@@ -109,6 +109,16 @@ type Concurrentable interface {
 	GetTotalPages() int
 }
 
+type Writeable interface {
+	*SymbolHistory | *SymbolCorrection | *SymbolData
+	GetResults() interface{}
+	GetTotalPages() int
+}
+
+func (r SymbolData) GetResults() interface{} {
+	return r.Results
+}
+
 func (r SymbolData) GetTotalPages() int {
 	return r.Metadata.TotalPages
 }
@@ -117,6 +127,12 @@ func (s SymbolCorrection) GetTotalPages() int {
 }
 func (s SymbolHistory) GetTotalPages() int {
 	return s.Metadata.TotalPages
+}
+func (r SymbolHistory) GetSelf() Concurrentable {
+	return r
+}
+func (r SymbolCorrection) GetSelf() Concurrentable {
+	return r
 }
 
 type Result[T Concurrentable] struct {

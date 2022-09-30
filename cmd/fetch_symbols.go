@@ -36,6 +36,7 @@ var symCmd = &cobra.Command{
 
 		go func() {
 			main.getSymbols(ctx, mdc, startDate)
+			// dbWrite(ctx, main.tx, main.p, main.symbolService, main.chSymbolData)
 			main.writeSymbols(ctx)
 		}()
 		main.p.Start()
@@ -78,3 +79,32 @@ func (m *Main) writeSymbols(ctx context.Context) {
 	m.p.Quit()
 
 }
+
+// func dbWrite[T platts.Writeable](ctx context.Context, tx *sql.Tx, p *tea.Program, s *services.SymbolService, ch chan platts.Result[T]) {
+
+// 	count := 0
+
+// 	for result := range ch {
+// 		if result.Err != nil {
+// 			log.Printf("fetch: %s", result.Err)
+// 			p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(result.Err)}})
+// 			p.Quit()
+// 		}
+
+// 		res := result.Message
+// 		p.Send(tui.ProgressUpdater{Name: "Symbols", Percent: 1 / float64(res.GetTotalPages())})
+// 		ok, _ := res.GetResults().(platts.SymbolHistory)
+// 		for _, r := range ok.Results {
+// 			_, err := s.Add(ctx, tx, r)
+// 			if err != nil {
+// 				log.Printf("write: %s", err)
+// 				p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(err)}})
+// 				p.Quit()
+// 			}
+// 			count += 1
+// 		}
+// 	}
+// 	p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
+// 	tx.Commit()
+// 	p.Quit()
+// }
