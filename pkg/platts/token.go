@@ -3,7 +3,7 @@ package platts
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,7 +43,7 @@ func GetToken(Username string, Password string, APIKey string) (Token, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		return Token{}, fmt.Errorf("unable to fetch a token; please check your credentials: %s", body)
 	}
 

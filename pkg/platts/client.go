@@ -3,7 +3,7 @@ package platts
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -55,7 +55,7 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("[%s] %s %s\n %s", req.Method, res.Status, u, body)
 	}
 
