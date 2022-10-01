@@ -1,15 +1,8 @@
 package fetch
 
 import (
-	"strings"
-
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
-)
-
-const (
-	padding  = 2
-	maxWidth = 70
 )
 
 func newProgress() progressModel {
@@ -49,7 +42,6 @@ func (m progressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m progressModel) View() string {
-	pad := strings.Repeat(" ", padding)
-	return "\n" +
-		pad + m.progress.View() + "\n"
+	// pad := strings.Repeat(" ", padding)
+	return "\n" + m.progress.View() + "\n"
 }

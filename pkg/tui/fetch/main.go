@@ -1,8 +1,15 @@
 package fetch
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+)
+
+const (
+	padding  = 2
+	maxWidth = 70
 )
 
 type model struct {
@@ -41,5 +48,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	return lipgloss.JoinVertical(lipgloss.Center, "\n", m.header.View(), m.progress.View(), m.footer.View(), "\n")
+	pad := strings.Repeat(" ", padding)
+	v1 := m.header.View()
+	v2 := m.progress.View()
+	v3 := m.footer.View()
+
+	vj := lipgloss.JoinVertical(lipgloss.Left, "\n", v1, v2, v3, "\n")
+	return lipgloss.JoinHorizontal(lipgloss.Left, pad, vj)
 }
