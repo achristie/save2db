@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "embed"
 
@@ -36,7 +37,6 @@ func getPreparedStmts(s string) (string, string) {
 	default:
 		return insert_sqlite, delete_sqlite
 	}
-
 }
 
 func NewAssessmentsService(ctx context.Context, db *sql.DB, dbSelection string) (*AssessmentsService, error) {
@@ -57,7 +57,12 @@ func NewAssessmentsService(ctx context.Context, db *sql.DB, dbSelection string) 
 	return &as, nil
 }
 
-func (s *AssessmentsService) Remove(ctx context.Context, tx *sql.Tx, record platts.Assessment) (sql.Result, error) {
+func (s *AssessmentsService) Remove(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+	record, ok := r.(platts.Assessment)
+	if !ok {
+		return nil, fmt.Errorf("remove: must use a platts.assessment")
+	}
+
 	res, err := tx.StmtContext(ctx, s.delete).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
 	if err != nil {
 		return nil, err
@@ -65,7 +70,13 @@ func (s *AssessmentsService) Remove(ctx context.Context, tx *sql.Tx, record plat
 	return res, nil
 }
 
-func (s *AssessmentsService) Add(ctx context.Context, tx *sql.Tx, record platts.Assessment) (sql.Result, error) {
+func (s *AssessmentsService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+	record, ok := r.(platts.Assessment)
+	if !ok {
+		return nil, fmt.Errorf("remove: must use a platts.assessment")
+	}
+	log.Printf("%+v", record)
+
 	res, err := tx.StmtContext(ctx, s.insert).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
 	if err != nil {
 		return nil, err

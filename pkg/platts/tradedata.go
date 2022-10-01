@@ -105,6 +105,14 @@ func (t TradeData) GetTotalPages() int {
 	return t.Metadata.TotalPages
 }
 
+func (t TradeData) GetResults() []interface{} {
+	i := make([]interface{}, len(t.Results))
+	for idx, r := range t.Results {
+		i[idx] = r
+	}
+	return i
+}
+
 type Market struct {
 	Name      string `json:"name"`
 	ShortCode string `json:"short_code"`

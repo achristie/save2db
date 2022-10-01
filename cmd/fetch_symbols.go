@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -26,18 +25,16 @@ var symCmd = &cobra.Command{
 			fmt.Print(err)
 			os.Exit(1)
 		}
-		main.symbolService = ss
 
 		// initialize TUI
 		main.p = tui.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Symbols"})
 
 		// initialize Channel
-		main.chSymbolData = make(chan platts.Result[platts.SymbolData])
+		ch := make(chan platts.Result[platts.SymbolData])
 
 		go func() {
-			main.getSymbols(ctx, mdc, startDate)
-			// dbWrite(ctx, main.tx, main.p, main.symbolService, main.chSymbolData)
-			main.writeSymbols(ctx)
+			main.getSymbols(ctx, mdc, startDate, ch)
+			writeToSvc(ctx, &main, ch, ss)
 		}()
 		main.p.Start()
 	},
@@ -46,65 +43,7 @@ var symCmd = &cobra.Command{
 func init() {
 	fetchCmd.AddCommand(symCmd)
 }
-func (m *Main) getSymbols(ctx context.Context, mdc string, start time.Time) {
-	m.client.GetReferenceData(start, 1000, mdc, m.chSymbolData)
+func (m *Main) getSymbols(ctx context.Context, mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
+	m.client.GetReferenceData(start, 1000, mdc, ch)
 	m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.INPROGRESS, Msg: "In Progress"}})
 }
-
-func (m *Main) writeSymbols(ctx context.Context) {
-	count := 0
-
-	for result := range m.chSymbolData {
-		if result.Err != nil {
-			log.Printf("fetch: %s", result.Err)
-			m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(result.Err)}})
-			m.p.Quit()
-		}
-
-		res := result.Message
-		m.p.Send(tui.ProgressUpdater{Name: "Symbols", Percent: 1 / float64(res.Metadata.TotalPages)})
-
-		for _, r := range res.Results {
-			_, err := m.symbolService.Add(ctx, m.tx, r)
-			if err != nil {
-				log.Printf("write: %s", err)
-				m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(err)}})
-				m.p.Quit()
-			}
-			count += 1
-		}
-	}
-	m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
-	m.tx.Commit()
-	m.p.Quit()
-
-}
-
-// func dbWrite[T platts.Writeable](ctx context.Context, tx *sql.Tx, p *tea.Program, s *services.SymbolService, ch chan platts.Result[T]) {
-
-// 	count := 0
-
-// 	for result := range ch {
-// 		if result.Err != nil {
-// 			log.Printf("fetch: %s", result.Err)
-// 			p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(result.Err)}})
-// 			p.Quit()
-// 		}
-
-// 		res := result.Message
-// 		p.Send(tui.ProgressUpdater{Name: "Symbols", Percent: 1 / float64(res.GetTotalPages())})
-// 		ok, _ := res.GetResults().(platts.SymbolHistory)
-// 		for _, r := range ok.Results {
-// 			_, err := s.Add(ctx, tx, r)
-// 			if err != nil {
-// 				log.Printf("write: %s", err)
-// 				p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.ERROR, Msg: fmt.Sprint(err)}})
-// 				p.Quit()
-// 			}
-// 			count += 1
-// 		}
-// 	}
-// 	p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.COMPLETED, Msg: fmt.Sprintf("Complete! Added [%d records] to [assessments]", count)}})
-// 	tx.Commit()
-// 	p.Quit()
-// }

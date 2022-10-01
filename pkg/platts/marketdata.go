@@ -104,40 +104,39 @@ type Assessment struct {
 	ModDate     string
 }
 
-// Allow pages to be fetched concurrently
-type Concurrentable interface {
-	GetTotalPages() int
+func (s SymbolData) GetTotalPages() int {
+	return s.Metadata.TotalPages
+}
+func (s SymbolData) GetResults() []interface{} {
+	i := make([]interface{}, len(s.Results))
+	for idx, r := range s.Results {
+		i[idx] = r
+	}
+	return i
 }
 
-type Writeable interface {
-	*SymbolHistory | *SymbolCorrection | *SymbolData
-	GetResults() interface{}
-	GetTotalPages() int
-}
-
-func (r SymbolData) GetResults() interface{} {
-	return r.Results
-}
-
-func (r SymbolData) GetTotalPages() int {
-	return r.Metadata.TotalPages
-}
 func (s SymbolCorrection) GetTotalPages() int {
 	return s.Metadata.TotalPages
 }
+func (s SymbolCorrection) GetResults() []interface{} {
+	a := s.Flatten()
+	i := make([]interface{}, len(a))
+	for idx, r := range a {
+		i[idx] = r
+	}
+	return i
+}
+
 func (s SymbolHistory) GetTotalPages() int {
 	return s.Metadata.TotalPages
 }
-func (r SymbolHistory) GetSelf() Concurrentable {
-	return r
-}
-func (r SymbolCorrection) GetSelf() Concurrentable {
-	return r
-}
-
-type Result[T Concurrentable] struct {
-	Message T
-	Err     error
+func (s SymbolHistory) GetResults() []interface{} {
+	a := s.Flatten()
+	i := make([]interface{}, len(a))
+	for idx, r := range a {
+		i[idx] = r
+	}
+	return i
 }
 
 type MDC struct {

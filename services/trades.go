@@ -44,7 +44,11 @@ func NewTradeService(ctx context.Context, db *sql.DB, dbSelection string) (*Trad
 	}
 	return &ts, nil
 }
-func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, r platts.TradeResults) (sql.Result, error) {
+func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, record interface{}) (sql.Result, error) {
+	r, ok := record.(platts.TradeResults)
+	if !ok {
+		return nil, fmt.Errorf("add: must be a platts.TradeResult")
+	}
 	// convert Markets to json
 	mkts, err := json.Marshal(&r.Markets)
 	if err != nil {
@@ -67,4 +71,8 @@ func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, r platts.TradeResult
 	}
 	return res, nil
 
+}
+
+func (s *TradeService) Remove(ctx context.Context, tx *sql.Tx, record interface{}) (sql.Result, error) {
+	panic("Not implemented")
 }

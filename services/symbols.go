@@ -45,8 +45,9 @@ func NewSymbolService(ctx context.Context, db *sql.DB, dbSelection string) (*Sym
 	}
 	return &ss, nil
 }
-func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, record platts.SymbolResults) (sql.Result, error) {
+func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
 	// convert bates to JSON
+	record := r.(platts.SymbolResults)
 	bates, err := json.Marshal(&record.Bate)
 	if err != nil {
 		return nil, err
@@ -71,4 +72,8 @@ func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, record platts.Symbo
 	}
 
 	return res, nil
+}
+
+func (s *SymbolService) Remove(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+	panic("not implemented")
 }
