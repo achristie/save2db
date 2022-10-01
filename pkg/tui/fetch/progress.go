@@ -9,31 +9,36 @@ import (
 
 const (
 	padding  = 2
-	maxWidth = 80
+	maxWidth = 70
 )
 
-func NewProgress() model {
+func newProgress() progressModel {
 	prog := progress.New(progress.WithScaledGradient("#FF7CCB", "#FDFF8C"))
 	prog.Width = maxWidth
 
-	return model{progress: prog}
+	return progressModel{progress: prog}
 }
 
-type model struct {
+type progressModel struct {
 	progress progress.Model
 }
 
-func (model) Init() tea.Cmd {
+func (progressModel) Init() tea.Cmd {
 	return nil
 }
 
-type ProgressUpdater float64
+type ProgressMsg float64
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m progressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case ProgressUpdater:
+	case tea.KeyMsg:
+		return m, tea.Quit
+
+	case ProgressMsg:
 		cmd := m.progress.IncrPercent(float64(msg))
+		m.progress.Update(msg)
 		return m, cmd
+
 	case progress.FrameMsg:
 		progressModel, cmd := m.progress.Update(msg)
 		m.progress = progressModel.(progress.Model)
@@ -43,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() string {
+func (m progressModel) View() string {
 	pad := strings.Repeat(" ", padding)
 	return "\n" +
 		pad + m.progress.View() + "\n"

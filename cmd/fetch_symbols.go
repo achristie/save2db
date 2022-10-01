@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/achristie/save2db/pkg/platts"
-	tui "github.com/achristie/save2db/pkg/tui/progress"
+	"github.com/achristie/save2db/pkg/tui/fetch"
 	"github.com/achristie/save2db/services"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
 )
@@ -26,8 +27,9 @@ var symCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// initialize TUI
-		main.p = tui.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Symbols"})
+		filters := make(map[string]string)
+		filters["yo"] = "oh now"
+		main.p = tea.NewProgram(fetch.New("Fetch Symbols", filters))
 
 		// initialize Channel
 		ch := make(chan platts.Result[platts.SymbolData])
@@ -45,5 +47,5 @@ func init() {
 }
 func (m *Main) getSymbols(ctx context.Context, mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
 	m.client.GetReferenceData(start, 1000, mdc, ch)
-	m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.INPROGRESS, Msg: "In Progress"}})
+	// m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.INPROGRESS, Msg: "In Progress"}})
 }
