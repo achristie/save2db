@@ -33,6 +33,20 @@ var faCmd = &cobra.Command{
 		// initialize Channel
 		ch := make(chan platts.Result[platts.SymbolHistory])
 
+		// use watchlist if set
+		if watchlist != "" {
+			wl, err := getWatchlist(ctx, watchlist)
+			if err != nil {
+				fmt.Printf("get watchlist: %v", err)
+				os.Exit(1)
+			}
+			if wl.Metadata.Count == 0 {
+				fmt.Printf("could not find watchlist named %q\n", watchlist)
+				os.Exit(1)
+			}
+			symbols = wl.Results[0].Payload
+		}
+
 		// setup TUI
 		filters := make(map[string]string)
 		if mdc != "" {
@@ -64,4 +78,13 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 	} else {
 		m.client.GetHistoryByMDC(mdc, start, 10000, ch)
 	}
+}
+
+func getWatchlist(ctx context.Context, name string) (platts.Watchlist, error) {
+	c := platts.NewClient(config.Fake, config.Username, config.Password)
+	wl, err := c.GetWatchlistByName(name)
+	if err != nil {
+		return platts.Watchlist{}, nil
+	}
+	return wl, nil
 }

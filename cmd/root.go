@@ -81,4 +81,5 @@ type Config struct {
 	DBUsername  string `mapstructure:"dbusername"`
 	DBPassword  string `mapstructure:"dbpassword"`
 	Path        string `mapstructure:"path"`
+	Fake        string `mapstructure:"fake"`
 }

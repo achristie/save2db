@@ -28,6 +28,7 @@ var (
 	mdc       string
 	symbols   []string
 	markets   []string
+	watchlist string
 )
 
 var fetchCmd = &cobra.Command{
@@ -100,7 +101,8 @@ func init() {
 
 	fetchCmd.PersistentFlags().StringVar(&mdc, "mdc", "", "Market Data Category to get assessments for. Ex: IO")
 	fetchCmd.PersistentFlags().StringSliceVarP(&symbols, "symbol", "s", nil, "Symbols to get assessments for. Ex: 'PCAAS00, PCAAT00'")
-	fetchCmd.MarkFlagsMutuallyExclusive("mdc", "symbol")
+	fetchCmd.PersistentFlags().StringVarP(&watchlist, "watchlist", "w", "", "Use Symbols from a PDP Watchlist.")
+	fetchCmd.MarkFlagsMutuallyExclusive("mdc", "symbol", "watchlist")
 
 	fetchCmd.PersistentFlags().StringVarP(&start, "startDate", "t", time.Now().UTC().AddDate(0, 0, -7).Format("2006-01-02T15:04:05"), "Get assessments since t. Ex. 2021-01-01T00:00:00")
 
