@@ -9,13 +9,12 @@ import (
 
 var (
 	titleStyle = lipgloss.NewStyle().
-			MarginRight(5).
 			Padding(0, 1).
 			Foreground(lipgloss.Color("#FFFDF5")).
 			Background(lipgloss.Color("#6495ED")).
 			Render
 
-	filterStyle = lipgloss.NewStyle().MarginLeft(2).Render
+	filterStyle = lipgloss.NewStyle().PaddingLeft(1).Render
 )
 
 type headerModel struct {

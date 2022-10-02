@@ -43,18 +43,37 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 		}
 	}
 
-	m.tx.Commit()
-
-	var s string
-	if delete {
-		s = fmt.Sprintf("removed [%d] records from [%s]", count, config.DBSelection)
-	} else {
-		s = fmt.Sprintf("added [%d] records to [%s]", count, config.DBSelection)
+	// all good so proceed with commit
+	err := m.tx.Commit()
+	if err != nil {
+		m.p.Send(errCmd)
+		log.Print(err)
+		m.p.Quit()
 	}
 
-	m.p.Send(progress.StatusCmd(fmt.Sprintf("COMPLETE: %s", s))())
+	m.p.Send(progress.StatusCmd(fmt.Sprintf("COMPLETE: %s", getCompletionMsg(delete, count)))())
 
 	// make sure progress bar shows 100 before quitting :)
 	time.Sleep(time.Millisecond * 500)
 	m.p.Quit()
+}
+
+func getCompletionMsg(delete bool, count int) string {
+	var s string
+	if delete && config.DBSelection == "SQLite" {
+		if config.DBSelection == "SQLITE" {
+			s = fmt.Sprintf("removed [%d] records from [%s/%s]", count, config.DBSelection, config.Path)
+		} else {
+
+			s = fmt.Sprintf("removed [%d] records from [%s/%s]", count, config.DBSelection, config.DBName)
+		}
+	} else {
+		if config.DBSelection == "SQLite" {
+			s = fmt.Sprintf("added [%d] records to [%s/%s]", count, config.DBSelection, config.Path)
+		} else {
+
+			s = fmt.Sprintf("added [%d] records to [%s/%s]", count, config.DBSelection, config.DBName)
+		}
+	}
+	return s
 }

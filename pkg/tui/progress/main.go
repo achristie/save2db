@@ -9,7 +9,7 @@ import (
 
 const (
 	padding  = 2
-	maxWidth = 60
+	maxWidth = 70
 )
 
 var (

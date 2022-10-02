@@ -37,7 +37,7 @@ var faCmd = &cobra.Command{
 		if watchlist != "" {
 			wl, err := getWatchlist(ctx, watchlist)
 			if err != nil {
-				fmt.Printf("get watchlist: %v", err)
+				fmt.Printf("get watchlist: %v\n", err)
 				os.Exit(1)
 			}
 			if wl.Metadata.Count == 0 {
