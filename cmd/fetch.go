@@ -8,7 +8,6 @@ import (
 
 	"github.com/achristie/save2db/pg"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 	"github.com/achristie/save2db/sqlite"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
@@ -16,12 +15,9 @@ import (
 )
 
 type Main struct {
-	client             *platts.Client
-	tx                 *sql.Tx
-	p                  *tea.Program
-	tradeService       *services.TradeService
-	chTradeData        chan platts.Result[platts.TradeData]
-	chSymbolCorrection chan platts.Result[platts.SymbolCorrection]
+	client *platts.Client
+	tx     *sql.Tx
+	p      *tea.Program
 }
 
 var (
