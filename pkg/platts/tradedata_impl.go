@@ -16,6 +16,7 @@ func (c *Client) GetTradeData(markets []string, StartTime time.Time, PageSize in
 		params.Add("filter", fmt.Sprintf("update_time >= %q", StartTime.Format("2006-01-02T15:04:05")))
 	}
 	params.Add("pagesize", strconv.Itoa(min(1000, PageSize))) // max is 1k
+	params.Add("sort", "update_time: asc")
 
 	req, err := c.newRequest("tradedata/v3/ewindowdata", params)
 	if err != nil {
