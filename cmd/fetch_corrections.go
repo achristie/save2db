@@ -7,8 +7,9 @@ import (
 	"time"
 
 	"github.com/achristie/save2db/pkg/platts"
-	tui "github.com/achristie/save2db/pkg/tui/progress"
+	"github.com/achristie/save2db/pkg/tui/progress"
 	"github.com/achristie/save2db/services"
+	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
@@ -21,8 +22,10 @@ var fcCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
-		// initialize TUI
-		main.p = tui.NewProgram(fmt.Sprintf("MDC: [%s], Modified Date >= [%s]", mdc, start), []string{"Symbols"})
+		// setup TUI
+		filters := make(map[string]string)
+		filters["modifiedDate"] = ">= " + start
+		main.p = tea.NewProgram(progress.New("FETCH CORRECTIONS", filters))
 
 		// initialize assessments service
 		as, err := services.NewAssessmentsService(ctx, db.GetDB(), config.DBSelection)
@@ -48,5 +51,4 @@ func init() {
 
 func (m *Main) getCorrections(ctx context.Context, start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
 	m.client.GetDeletes(start, 10000, ch)
-	m.p.Send(tui.StatusUpdater{Name: "Symbols", Status: tui.Status{Category: tui.INPROGRESS, Msg: "In Progress"}})
 }

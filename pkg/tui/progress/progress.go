@@ -1,4 +1,4 @@
-package fetch
+package progress
 
 import (
 	"github.com/charmbracelet/bubbles/progress"
@@ -42,6 +42,5 @@ func (m progressModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m progressModel) View() string {
-	// pad := strings.Repeat(" ", padding)
 	return "\n" + m.progress.View() + "\n"
 }
