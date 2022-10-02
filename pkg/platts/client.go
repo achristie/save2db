@@ -90,7 +90,7 @@ func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Res
 			var result T
 
 			// copy the request but change the page
-			p := req.URL.Path
+			p := req.URL.Path[1:len(req.URL.Path)]
 			q := req.URL.Query()
 			q.Set("page", strconv.Itoa(page))
 
