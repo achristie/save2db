@@ -46,7 +46,7 @@ var faCmd = &cobra.Command{
 		// fetch and store
 		go func() {
 			main.getAssessments(ctx, mdc, symbols, startDate, ch)
-			writeToSvc(ctx, &main, ch, as)
+			writeToSvc(ctx, &main, ch, as, false)
 		}()
 
 		// start TUI

@@ -39,7 +39,7 @@ var symCmd = &cobra.Command{
 		// fetch and store
 		go func() {
 			main.getSymbols(ctx, mdc, startDate, ch)
-			writeToSvc(ctx, &main, ch, ss)
+			writeToSvc(ctx, &main, ch, ss, false)
 		}()
 
 		// start TUI

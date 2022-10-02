@@ -40,7 +40,7 @@ var tradeCmd = &cobra.Command{
 		// fetch and store
 		go func() {
 			main.getTrades(ctx, markets, startDate, ch)
-			writeToSvc(ctx, &main, ch, ts)
+			writeToSvc(ctx, &main, ch, ts, false)
 		}()
 
 		// start TUI

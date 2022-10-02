@@ -11,7 +11,7 @@ import (
 	"github.com/achristie/save2db/services"
 )
 
-func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts.Result[T], svc services.Service) {
+func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts.Result[T], svc services.Service, delete bool) {
 	count := 0
 	errCmd := progress.StatusCmd("ERROR: check the log file for details.")()
 	m.p.Send(progress.StatusCmd("IN PROGRESS")())
@@ -27,7 +27,12 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 		m.p.Send(progress.ProgressMsg(1 / float64(result.Message.GetTotalPages())))
 
 		for _, r := range res.GetResults() {
-			_, err := svc.Add(ctx, m.tx, r)
+			var err error
+			if delete {
+				_, err = svc.Remove(ctx, m.tx, r)
+			} else {
+				_, err = svc.Add(ctx, m.tx, r)
+			}
 			if err != nil {
 				log.Printf("write: %s", err)
 				m.p.Send(errCmd)
@@ -39,10 +44,17 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 	}
 
 	m.tx.Commit()
-	s := fmt.Sprintf("added [%d] records to [%s]", count, config.DBSelection)
+
+	var s string
+	if delete {
+		s = fmt.Sprintf("removed [%d] records from [%s]", count, config.DBSelection)
+	} else {
+		s = fmt.Sprintf("added [%d] records to [%s]", count, config.DBSelection)
+	}
+
 	m.p.Send(progress.StatusCmd(fmt.Sprintf("COMPLETE: %s", s))())
 
 	// make sure progress bar shows 100 before quitting :)
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Millisecond * 500)
 	m.p.Quit()
 }

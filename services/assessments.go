@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "embed"
 
@@ -61,8 +62,9 @@ func (s *AssessmentsService) Remove(ctx context.Context, tx *sql.Tx, r interface
 	if !ok {
 		return nil, fmt.Errorf("remove: must use a platts.assessment")
 	}
+	log.Printf("%+v", record)
 
-	res, err := tx.StmtContext(ctx, s.delete).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
+	res, err := tx.StmtContext(ctx, s.delete).Exec(record.Symbol, record.Bate, record.AssessDate)
 	if err != nil {
 		return nil, err
 	}

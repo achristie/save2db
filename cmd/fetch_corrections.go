@@ -39,7 +39,7 @@ var fcCmd = &cobra.Command{
 
 		go func() {
 			main.getCorrections(ctx, startDate, ch)
-			writeToSvc(ctx, &main, ch, as)
+			writeToSvc(ctx, &main, ch, as, true)
 		}()
 		main.p.Start()
 	},
