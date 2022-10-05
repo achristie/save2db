@@ -19,8 +19,12 @@
 *.db
 *.db-*
 
-# Notebook files
+# Notebook backup files
 .ipynb_checkpoints
 
 # Logs
 *.log
+
+
+# OSX nonsense
+*.DS_Store
