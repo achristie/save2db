@@ -21,6 +21,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 			log.Printf("fetch: %s", result.Err)
 			m.p.Send(errCmd)
 			m.p.Quit()
+			return
 		}
 
 		res := *result.Message

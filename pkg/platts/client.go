@@ -73,6 +73,7 @@ func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Res
 	// make an initial request
 	if _, err := c.do(req, &result); err != nil {
 		ch <- Result[T]{nil, err}
+		return
 	}
 	ch <- Result[T]{&result, nil}
 
