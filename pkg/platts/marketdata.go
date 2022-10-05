@@ -107,6 +107,7 @@ type Assessment struct {
 func (s SymbolData) GetTotalPages() int {
 	return s.Metadata.TotalPages
 }
+
 func (s SymbolData) GetResults() []interface{} {
 	i := make([]interface{}, len(s.Results))
 	for idx, r := range s.Results {
@@ -118,6 +119,7 @@ func (s SymbolData) GetResults() []interface{} {
 func (s SymbolCorrection) GetTotalPages() int {
 	return s.Metadata.TotalPages
 }
+
 func (s SymbolCorrection) GetResults() []interface{} {
 	a := s.Flatten()
 	i := make([]interface{}, len(a))
@@ -130,6 +132,7 @@ func (s SymbolCorrection) GetResults() []interface{} {
 func (s SymbolHistory) GetTotalPages() int {
 	return s.Metadata.TotalPages
 }
+
 func (s SymbolHistory) GetResults() []interface{} {
 	a := s.Flatten()
 	i := make([]interface{}, len(a))

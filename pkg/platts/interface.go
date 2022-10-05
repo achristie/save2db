@@ -12,6 +12,6 @@ type Writeable interface {
 }
 
 type Result[T Concurrentable] struct {
-	Message T
+	Message *T
 	Err     error
 }

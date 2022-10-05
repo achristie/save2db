@@ -19,7 +19,7 @@ func (c *Client) GetDeletes(StartTime time.Time, PageSize int, ch chan Result[Sy
 
 	req, err := c.newRequest("market-data/v3/value/correction/modified-date", params)
 	if err != nil {
-		ch <- Result[SymbolCorrection]{SymbolCorrection{}, err}
+		ch <- Result[SymbolCorrection]{nil, err}
 	}
 
 	go func() {
@@ -36,7 +36,7 @@ func (c *Client) GetHistory(StartTime time.Time, PageSize int, ch chan Result[Sy
 
 	req, err := c.newRequest("market-data/v3/value/history/", params)
 	if err != nil {
-		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
+		ch <- Result[SymbolHistory]{nil, err}
 	}
 
 	go func() {
@@ -53,7 +53,7 @@ func (c *Client) GetHistoryBySymbol(symbol []string, startTime time.Time, PageSi
 
 	req, err := c.newRequest("market-data/v3/value/history/symbol", params)
 	if err != nil {
-		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
+		ch <- Result[SymbolHistory]{nil, err}
 	}
 
 	go func() {
@@ -72,7 +72,7 @@ func (c *Client) GetHistoryByMDC(Mdc string, StartTime time.Time, PageSize int, 
 
 	req, err := c.newRequest("market-data/v3/value/history/mdc", params)
 	if err != nil {
-		ch <- Result[SymbolHistory]{SymbolHistory{}, err}
+		ch <- Result[SymbolHistory]{nil, err}
 	}
 
 	go func() {
@@ -91,7 +91,7 @@ func (c *Client) GetReferenceData(StartTime time.Time, PageSize int, q string, c
 
 	req, err := c.newRequest("market-data/reference-data/v3/search", params)
 	if err != nil {
-		ch <- Result[SymbolData]{SymbolData{}, err}
+		ch <- Result[SymbolData]{nil, err}
 	}
 
 	go func() {

@@ -23,8 +23,8 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 			m.p.Quit()
 		}
 
-		res := result.Message
-		m.p.Send(progress.ProgressMsg(1 / float64(result.Message.GetTotalPages())))
+		res := *result.Message
+		m.p.Send(progress.ProgressMsg(1 / float64(res.GetTotalPages())))
 
 		for _, r := range res.GetResults() {
 			var err error
@@ -54,7 +54,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 	m.p.Send(progress.StatusCmd(fmt.Sprintf("COMPLETE: %s", getCompletionMsg(delete, count)))())
 
 	// make sure progress bar shows 100 before quitting :)
-	time.Sleep(time.Millisecond * 500)
+	time.Sleep(time.Second * 1)
 	m.p.Quit()
 }
 

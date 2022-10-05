@@ -20,7 +20,7 @@ func (c *Client) GetTradeData(markets []string, StartTime time.Time, PageSize in
 
 	req, err := c.newRequest("tradedata/v3/ewindowdata", params)
 	if err != nil {
-		ch <- Result[TradeData]{TradeData{}, err}
+		ch <- Result[TradeData]{nil, err}
 	}
 
 	go func() {

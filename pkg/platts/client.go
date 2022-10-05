@@ -70,12 +70,11 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 // If the first page fails then abort, otherwise attempt to get all pages.
 // Errors must be handled by consumer
 func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Result[T], result T) {
+	// make an initial request
 	if _, err := c.do(req, &result); err != nil {
-		// If first request fails then abort
-		ch <- Result[T]{result, err}
-		// log.Fatalf("Could not make first request: %s", err)
+		ch <- Result[T]{nil, err}
 	}
-	ch <- Result[T]{result, nil}
+	ch <- Result[T]{&result, nil}
 
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, 4) // semaphore to avoid throttling
@@ -97,15 +96,15 @@ func getConcurrently[T Concurrentable](c *Client, req *http.Request, ch chan Res
 			// generate a request
 			req, err := c.newRequest(p, q)
 			if err != nil {
-				ch <- Result[T]{result, err}
+				ch <- Result[T]{nil, err}
 			}
 
 			// make the request
 			_, err = c.do(req, &result)
 			if err != nil {
-				ch <- Result[T]{result, err}
+				ch <- Result[T]{nil, err}
 			}
-			ch <- Result[T]{result, nil} // send marshalled response to the channel
+			ch <- Result[T]{&result, nil} // send marshalled response to the channel
 			<-sem
 		}(i)
 	}
