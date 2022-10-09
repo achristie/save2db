@@ -12,7 +12,7 @@ import (
 
 func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts.Result[T], svc services.Service, delete bool) {
 	count := 0
-	errCmd := progress.StatusCmd("ERROR: check the log file for details.")()
+	errCmd := progress.StatusCmd("ERROR: Please try again.")()
 	m.p.Send(progress.StatusCmd("IN PROGRESS")())
 
 	for result := range ch {
