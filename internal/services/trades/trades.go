@@ -1,4 +1,4 @@
-package services
+package trades
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-//go:embed scripts/pg/trades/insert.sql
+//go:embed pg/insert.sql
 var insert_trade_pg string
 
-//go:embed scripts/sqlite/trades/insert.sql
+//go:embed sqlite/insert.sql
 var insert_trade_sqlite string
 
 type TradeService struct {
@@ -32,7 +32,7 @@ func getTradeStmts(s string) string {
 
 }
 
-func NewTradeService(ctx context.Context, db *sql.DB, dbSelection string) (*TradeService, error) {
+func New(ctx context.Context, db *sql.DB, dbSelection string) (*TradeService, error) {
 	ins := getTradeStmts(dbSelection)
 	insert, err := db.PrepareContext(ctx, ins)
 	if err != nil {

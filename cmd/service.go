@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/achristie/save2db/internal/services"
 	progress "github.com/achristie/save2db/internal/tui/progress"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 )
 
 func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts.Result[T], svc services.Service, delete bool) {

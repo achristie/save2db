@@ -1,4 +1,4 @@
-package services
+package assessments
 
 import (
 	"context"
@@ -11,16 +11,16 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-//go:embed scripts/pg/assessments/insert.sql
+//go:embed pg/insert.sql
 var insert_pg string
 
-//go:embed scripts/pg/assessments/delete.sql
+//go:embed pg/delete.sql
 var delete_pg string
 
-//go:embed scripts/sqlite/assessments/insert.sql
+//go:embed sqlite/insert.sql
 var insert_sqlite string
 
-//go:embed scripts/sqlite/assessments/delete.sql
+//go:embed sqlite/delete.sql
 var delete_sqlite string
 
 type AssessmentsService struct {
@@ -39,7 +39,7 @@ func getPreparedStmts(s string) (string, string) {
 	}
 }
 
-func NewAssessmentsService(ctx context.Context, db *sql.DB, dbSelection string) (*AssessmentsService, error) {
+func New(ctx context.Context, db *sql.DB, dbSelection string) (*AssessmentsService, error) {
 	ins, del := getPreparedStmts(dbSelection)
 	insert, err := db.PrepareContext(ctx, ins)
 	if err != nil {

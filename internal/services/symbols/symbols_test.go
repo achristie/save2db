@@ -1,13 +1,13 @@
-package services_test
+package symbols_test
 
 import (
 	"context"
 	"path/filepath"
 	"testing"
 
+	"github.com/achristie/save2db/internal/services/symbols"
 	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 )
 
 func TestSymbolServiceAdd(t *testing.T) {
@@ -19,7 +19,7 @@ func TestSymbolServiceAdd(t *testing.T) {
 
 		ctx := context.Background()
 
-		as, err := services.NewSymbolService(ctx, db.GetDB(), "SQLite")
+		as, err := symbols.New(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/achristie/save2db/internal/services/assessments"
 	"github.com/achristie/save2db/internal/tui/progress"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/spf13/cobra"
@@ -24,7 +24,7 @@ var faCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize assessments service
-		as, err := services.NewAssessmentsService(ctx, db.GetDB(), config.DBSelection)
+		as, err := assessments.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/achristie/save2db/internal/services/trades"
 	"github.com/achristie/save2db/internal/tui/progress"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
@@ -22,7 +22,7 @@ var tradeCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize trade service
-		ts, err := services.NewTradeService(ctx, db.GetDB(), config.DBSelection)
+		ts, err := trades.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)

@@ -1,4 +1,4 @@
-package services
+package symbols
 
 import (
 	"bytes"
@@ -11,10 +11,10 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-//go:embed scripts/pg/symbols/insert.sql
+//go:embed pg/insert.sql
 var insert_sym_pg string
 
-//go:embed scripts/sqlite/symbols/insert.sql
+//go:embed sqlite/insert.sql
 var insert_sym_sqlite string
 
 type SymbolService struct {
@@ -33,7 +33,7 @@ func getSymbolStmts(s string) string {
 
 }
 
-func NewSymbolService(ctx context.Context, db *sql.DB, dbSelection string) (*SymbolService, error) {
+func New(ctx context.Context, db *sql.DB, dbSelection string) (*SymbolService, error) {
 	ins := getSymbolStmts(dbSelection)
 	insert, err := db.PrepareContext(ctx, ins)
 	if err != nil {

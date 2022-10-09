@@ -3,7 +3,7 @@ package pg_test
 import (
 	"testing"
 
-	"github.com/achristie/save2db/pg"
+	"github.com/achristie/save2db/internal/pg"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 

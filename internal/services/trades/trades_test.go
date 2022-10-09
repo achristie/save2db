@@ -1,13 +1,13 @@
-package services_test
+package trades_test
 
 import (
 	"context"
 	"path/filepath"
 	"testing"
 
+	"github.com/achristie/save2db/internal/services/trades"
 	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 )
 
 func TestTradeSericeAdd(t *testing.T) {
@@ -19,7 +19,7 @@ func TestTradeSericeAdd(t *testing.T) {
 
 		ctx := context.Background()
 
-		ts, err := services.NewTradeService(ctx, db.GetDB(), "SQLite")
+		ts, err := trades.New(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}

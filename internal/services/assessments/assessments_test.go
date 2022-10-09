@@ -1,4 +1,4 @@
-package services_test
+package assessments_test
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/achristie/save2db/internal/services/assessments"
 	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 )
 
 func TestAssessmentsService_Add(t *testing.T) {
@@ -20,7 +20,7 @@ func TestAssessmentsService_Add(t *testing.T) {
 
 		ctx := context.Background()
 
-		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -57,7 +57,7 @@ func TestAssessmentsService_Add(t *testing.T) {
 		}
 
 		ctx := context.Background()
-		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -86,7 +86,7 @@ func TestAssessmentsService_Remove(t *testing.T) {
 
 		ctx := context.Background()
 
-		as, err := services.NewAssessmentsService(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}

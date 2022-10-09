@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	symService "github.com/achristie/save2db/internal/services/symbols"
 	"github.com/achristie/save2db/internal/tui/progress"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/services"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	_ "modernc.org/sqlite"
@@ -21,7 +21,7 @@ var symCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize symbol service
-		ss, err := services.NewSymbolService(ctx, db.GetDB(), config.DBSelection)
+		ss, err := symService.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
