@@ -2,8 +2,9 @@ package platts
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,7 +13,12 @@ import (
 
 const TokenEndpoint = "https://api.platts.com/auth/api"
 
-var cache Token
+var (
+	cache          Token
+	ErrInvalidCred = errors.New("token: invalid credentials or API key")
+	ErrServerIssue = errors.New("token: unable to reach the server")
+	ErrRateLimited = errors.New("token: rate limit exceeded")
+)
 
 type Token struct {
 	AccessToken  string    `json:"access_token"`
@@ -20,7 +26,7 @@ type Token struct {
 	Iat          time.Time `json:"-"`
 }
 
-func GetToken(Username string, Password string, APIKey string) (*Token, error) {
+func GetToken(Username string, Password string, APIKey string, errorLog, infoLog *log.Logger) (*Token, error) {
 	if time.Now().Before(cache.Iat.Add(50 * time.Minute)) {
 		return &cache, nil
 	}
@@ -44,7 +50,15 @@ func GetToken(Username string, Password string, APIKey string) (*Token, error) {
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		return nil, fmt.Errorf("unable to fetch a token; please check your credentials: %s", body)
+		errorLog.Printf("[%d] %s", res.StatusCode, body)
+		switch s := res.StatusCode; s {
+		case http.StatusForbidden, http.StatusUnauthorized, http.StatusBadRequest:
+			return nil, ErrInvalidCred
+		case http.StatusTooManyRequests:
+			return nil, ErrRateLimited
+		default:
+			return nil, ErrServerIssue
+		}
 	}
 
 	j := json.NewDecoder(res.Body)
@@ -54,5 +68,6 @@ func GetToken(Username string, Password string, APIKey string) (*Token, error) {
 	}
 	token.Iat = time.Now()
 	cache = token
+
 	return &token, nil
 }

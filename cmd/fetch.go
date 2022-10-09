@@ -46,9 +46,9 @@ var fetchCmd = &cobra.Command{
 		}
 
 		// fetch requires a token anyway so lets get one now
-		_, err = platts.GetToken(viper.GetString("username"), viper.GetString("password"), viper.GetString("apikey"))
+		_, err = platts.GetToken(config.Username, config.Password, config.APIKey, config.errorLog, config.infoLog)
 		if err != nil {
-			return fmt.Errorf("invalid credentials. Did you use the `configure` command?")
+			return err
 		}
 
 		return InitDB()
@@ -61,7 +61,6 @@ var fetchCmd = &cobra.Command{
 // setup db stuff
 func InitDB() error {
 	ctx := context.Background()
-	// client := platts.NewClient(config.APIKey, config.Username, config.Password)
 
 	switch config.DBSelection {
 	case "PostgreSQL":

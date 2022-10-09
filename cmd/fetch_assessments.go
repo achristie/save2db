@@ -82,11 +82,11 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 	}
 }
 
-func getWatchlist(ctx context.Context, name string) (platts.Watchlist, error) {
+func getWatchlist(ctx context.Context, name string) (*platts.Watchlist, error) {
 	c := platts.NewClient(config.Fake, config.Username, config.Password, config.errorLog, config.infoLog)
 	wl, err := c.GetWatchlistByName(name)
 	if err != nil {
-		return platts.Watchlist{}, nil
+		return nil, err
 	}
 	return wl, nil
 }

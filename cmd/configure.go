@@ -40,7 +40,7 @@ var configureCmd = &cobra.Command{
 		fmt.Println("Checking credentials...")
 		fmt.Println("-----------------------")
 
-		_, err := platts.GetToken(un, pw, apikey)
+		_, err := platts.GetToken(un, pw, apikey, config.errorLog, config.infoLog)
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Please try again.")

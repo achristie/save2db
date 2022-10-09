@@ -25,19 +25,19 @@ type Watchlist struct {
 	} `json:"results"`
 }
 
-func (c *Client) GetWatchlistByName(name string) (Watchlist, error) {
+func (c *Client) GetWatchlistByName(name string) (*Watchlist, error) {
 	params := url.Values{}
 	params.Add("configKey", fmt.Sprintf("{'name': %q}", name))
 
 	req, err := c.newRequest("platts-platform/user-preferences/v1/configurations/listmanagement", params)
 	if err != nil {
-		return Watchlist{}, err
+		return nil, err
 	}
 
 	var wl Watchlist
 	if _, err = c.do(req, &wl); err != nil {
-		return Watchlist{}, err
+		return nil, err
 	}
 
-	return wl, nil
+	return &wl, nil
 }

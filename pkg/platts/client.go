@@ -38,7 +38,7 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 	url := &c.baseURL
 	req, _ := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
 
-	token, err := GetToken(c.username, c.password, c.apiKey)
+	token, err := GetToken(c.username, c.password, c.apiKey, c.errorLog, c.infoLog)
 	if err != nil {
 		c.errorLog.Print(err)
 		return nil, err
