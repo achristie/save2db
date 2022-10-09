@@ -14,6 +14,7 @@ import (
 const tokenEndpoint = "https://api.platts.com/auth/api"
 
 var (
+	cache          Token
 	ErrInvalidCred = errors.New("token: invalid credentials or API key")
 	ErrServerIssue = errors.New("token: unable to reach the server")
 	ErrRateLimited = errors.New("token: rate limit exceeded")
@@ -25,6 +26,10 @@ type Token struct {
 	Iat          time.Time `json:"-"`
 }
 
+func (t *Token) String() string {
+	return t.AccessToken
+}
+
 type TokenClient struct {
 	TokenEndpoint string
 	username      string
@@ -32,7 +37,6 @@ type TokenClient struct {
 	apikey        string
 	errorLog      *log.Logger
 	infoLog       *log.Logger
-	cache         Token
 }
 
 func NewTokenClient(username, password, apikey string, errorLog, infoLog *log.Logger) *TokenClient {
@@ -47,8 +51,8 @@ func NewTokenClient(username, password, apikey string, errorLog, infoLog *log.Lo
 }
 
 func (tc *TokenClient) GetToken() (*Token, error) {
-	if time.Now().Before(tc.cache.Iat.Add(50 * time.Minute)) {
-		return &tc.cache, nil
+	if time.Now().Before(cache.Iat.Add(50 * time.Minute)) {
+		return &cache, nil
 	}
 	data := url.Values{}
 	data.Set("username", tc.username)
@@ -87,7 +91,7 @@ func (tc *TokenClient) GetToken() (*Token, error) {
 		return nil, err
 	}
 	token.Iat = time.Now()
-	tc.cache = token
+	cache = token
 
 	return &token, nil
 }
