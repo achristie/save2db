@@ -52,7 +52,7 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("appkey", c.apiKey)
-	req.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	return req, nil
 }
 

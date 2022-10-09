@@ -41,52 +41,21 @@ var fetchCmd = &cobra.Command{
 
 		// parse the date flag
 		var err error
-		startDate, err = time.Parse("2006-01-02T15:04:05", start)
+		startDate, err = ParseDate(start)
 		if err != nil {
 			return err
 		}
 
 		// fetch requires a token anyway so lets get one now
-		tc := token.NewTokenClient(config.username, config.password, config.apikey, config.errorLog, config.infoLog)
-		_, err = tc.GetToken()
-		if err != nil {
+		if err := InitToken(config); err != nil {
 			return err
 		}
 
-		return InitDB()
+		return InitDB(config)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("dataset not available, %s", args)
 	},
-}
-
-// setup db stuff
-func InitDB() error {
-	ctx := context.Background()
-
-	switch config.dbSelection {
-	case "PostgreSQL":
-		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.dbUsername, config.dbPassword,
-			config.dbHost, config.dbPort, config.dbName)
-		db = pg.NewDB(conn)
-	default:
-		db = sqlite.NewDB(config.path)
-	}
-
-	if err := db.Open(); err != nil {
-		return fmt.Errorf("db open: %w", err)
-	}
-
-	// begin a transaction
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("db tx: %w", err)
-	}
-
-	main = Main{
-		tx: tx,
-	}
-	return nil
 }
 
 func init() {
@@ -110,4 +79,52 @@ func init() {
 	fetchCmd.PersistentFlags().StringSliceVarP(&markets, "markets", "m", nil, "Markets to get Trades for. Ex: 'EU BFOE, US Midwest'")
 
 	rootCmd.AddCommand(fetchCmd)
+}
+
+func ParseDate(start string) (time.Time, error) {
+	startDate, err := time.Parse("2006-01-02T15:04:05", start)
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return startDate, nil
+}
+
+func InitToken(cfg Config) error {
+	tc := token.NewTokenClient(cfg.Username, cfg.Password, cfg.Apikey, cfg.errorLog, cfg.infoLog)
+	_, err := tc.GetToken()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// setup db
+func InitDB(cfg Config) error {
+	ctx := context.Background()
+
+	switch config.DBSelection {
+	case "PostgreSQL":
+		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", cfg.DBUsername, cfg.DBPassword,
+			cfg.DBHost, cfg.DBPort, cfg.DBName)
+		db = pg.NewDB(conn)
+	default:
+		db = sqlite.NewDB(cfg.Path)
+	}
+
+	if err := db.Open(); err != nil {
+		return fmt.Errorf("db open: %w", err)
+	}
+
+	// begin a transaction
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("db tx: %w", err)
+	}
+
+	main = Main{
+		tx: tx,
+	}
+	return nil
 }

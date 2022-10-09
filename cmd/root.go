@@ -43,9 +43,6 @@ func initConfig() {
 	// create if the config does not yet exists
 	os.OpenFile(fmt.Sprintf("%s/%s", home, configName), os.O_CREATE|os.O_RDONLY, 0666)
 
-	// problematic to use env variables
-	// viper.AutomaticEnv()
-
 	err = viper.ReadInConfig()
 	if err != nil {
 		fmt.Printf("unable to read config: %v", err)
@@ -63,7 +60,6 @@ func initConfig() {
 	if err := mapstructure.Decode(result, &config); err != nil {
 		fmt.Printf("decode config: %v", err)
 	}
-
 }
 
 type Database interface {
@@ -73,17 +69,17 @@ type Database interface {
 }
 
 type Config struct {
-	username    string `mapstructure:"username"`
-	apikey      string `mapstructure:"apikey"`
-	password    string `mapstructure:"password"`
-	dbHost      string `mapstructure:"dbhost"`
-	dbPort      string `mapstructure:"dbport"`
-	dbSelection string `mapstructure:"dbselection"`
-	dbName      string `mapstructure:"dbname"`
-	dbUsername  string `mapstructure:"dbusername"`
-	dbPassword  string `mapstructure:"dbpassword"`
-	path        string `mapstructure:"path"`
-	fake        string `mapstructure:"fake"`
-	errorLog    *log.Logger
-	infoLog     *log.Logger
+	Username    string      `mapstructure:"username"`
+	Apikey      string      `mapstructure:"apikey"`
+	Password    string      `mapstructure:"password"`
+	DBHost      string      `mapstructure:"dbhost"`
+	DBPort      string      `mapstructure:"dbport"`
+	DBSelection string      `mapstructure:"dbselection"`
+	DBName      string      `mapstructure:"dbname"`
+	DBUsername  string      `mapstructure:"dbusername"`
+	DBPassword  string      `mapstructure:"dbpassword"`
+	Path        string      `mapstructure:"path"`
+	Fake        string      `mapstructure:"fake"`
+	errorLog    *log.Logger `mapstructure:"-"`
+	infoLog     *log.Logger `mapstructure:"-"`
 }

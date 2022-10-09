@@ -23,10 +23,10 @@ var faCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		// initialize client
-		main.client = platts.NewClient(config.apikey, config.username, config.password, config.errorLog, config.infoLog)
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
 
 		// initialize assessments service
-		as, err := assessments.New(ctx, db.GetDB(), config.dbSelection)
+		as, err := assessments.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)
@@ -83,7 +83,7 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 }
 
 func getWatchlist(ctx context.Context, name string) (*platts.Watchlist, error) {
-	c := platts.NewClient(config.fake, config.username, config.password, config.errorLog, config.infoLog)
+	c := platts.NewClient(config.Fake, config.Username, config.Password, config.errorLog, config.infoLog)
 	wl, err := c.GetWatchlistByName(name)
 	if err != nil {
 		return nil, err
