@@ -21,7 +21,7 @@ var symCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize symbol service
-		ss, err := symService.New(ctx, db.GetDB(), config.DBSelection)
+		ss, err := symService.New(ctx, db.GetDB(), config.dbSelection)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)

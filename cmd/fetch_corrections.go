@@ -28,7 +28,7 @@ var fcCmd = &cobra.Command{
 		main.p = tea.NewProgram(progress.New("FETCH CORRECTIONS", filters))
 
 		// initialize assessments service
-		as, err := assessments.New(ctx, db.GetDB(), config.DBSelection)
+		as, err := assessments.New(ctx, db.GetDB(), config.dbSelection)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)

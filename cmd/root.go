@@ -73,17 +73,17 @@ type Database interface {
 }
 
 type Config struct {
-	Username    string `mapstructure:"username"`
-	APIKey      string `mapstructure:"apikey"`
-	Password    string `mapstructure:"password"`
-	DBHost      string `mapstructure:"dbhost"`
-	DBPort      string `mapstructure:"dbport"`
-	DBSelection string `mapstructure:"dbselection"`
-	DBName      string `mapstructure:"dbname"`
-	DBUsername  string `mapstructure:"dbusername"`
-	DBPassword  string `mapstructure:"dbpassword"`
-	Path        string `mapstructure:"path"`
-	Fake        string `mapstructure:"fake"`
+	username    string `mapstructure:"username"`
+	apikey      string `mapstructure:"apikey"`
+	password    string `mapstructure:"password"`
+	dbHost      string `mapstructure:"dbhost"`
+	dbPort      string `mapstructure:"dbport"`
+	dbSelection string `mapstructure:"dbselection"`
+	dbName      string `mapstructure:"dbname"`
+	dbUsername  string `mapstructure:"dbusername"`
+	dbPassword  string `mapstructure:"dbpassword"`
+	path        string `mapstructure:"path"`
+	fake        string `mapstructure:"fake"`
 	errorLog    *log.Logger
 	infoLog     *log.Logger
 }

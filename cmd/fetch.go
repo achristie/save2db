@@ -9,6 +9,7 @@ import (
 	"github.com/achristie/save2db/internal/pg"
 	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
+	"github.com/achristie/save2db/pkg/platts/token"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,7 +47,8 @@ var fetchCmd = &cobra.Command{
 		}
 
 		// fetch requires a token anyway so lets get one now
-		_, err = platts.GetToken(config.Username, config.Password, config.APIKey, config.errorLog, config.infoLog)
+		tc := token.NewTokenClient(config.username, config.password, config.apikey, config.errorLog, config.infoLog)
+		_, err = tc.GetToken()
 		if err != nil {
 			return err
 		}
@@ -62,13 +64,13 @@ var fetchCmd = &cobra.Command{
 func InitDB() error {
 	ctx := context.Background()
 
-	switch config.DBSelection {
+	switch config.dbSelection {
 	case "PostgreSQL":
-		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.DBUsername, config.DBPassword,
-			config.DBHost, config.DBPort, config.DBName)
+		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", config.dbUsername, config.dbPassword,
+			config.dbHost, config.dbPort, config.dbName)
 		db = pg.NewDB(conn)
 	default:
-		db = sqlite.NewDB(config.Path)
+		db = sqlite.NewDB(config.path)
 	}
 
 	if err := db.Open(); err != nil {

@@ -10,6 +10,12 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/achristie/save2db/pkg/platts/token"
+)
+
+const (
+	baseURL = "https://api.platts.com/"
 )
 
 type Client struct {
@@ -25,7 +31,7 @@ type Client struct {
 func NewClient(apiKey string, username string, password string, errorLog, infoLog *log.Logger) *Client {
 	return &Client{
 		apiKey:   apiKey,
-		baseURL:  "https://api.platts.com/",
+		baseURL:  baseURL,
 		c:        &http.Client{Timeout: time.Minute},
 		username: username,
 		password: password,
@@ -38,11 +44,12 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 	url := &c.baseURL
 	req, _ := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
 
-	token, err := GetToken(c.username, c.password, c.apiKey, c.errorLog, c.infoLog)
+	tc := token.NewTokenClient(c.username, c.password, c.apiKey, c.errorLog, c.infoLog)
+	token, err := tc.GetToken()
 	if err != nil {
-		c.errorLog.Print(err)
 		return nil, err
 	}
+
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("appkey", c.apiKey)
 	req.Header.Add("Authorization", "Bearer "+token.AccessToken)

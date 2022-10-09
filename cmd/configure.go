@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/achristie/save2db/pkg/platts"
+	"github.com/achristie/save2db/pkg/platts/token"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -40,7 +40,8 @@ var configureCmd = &cobra.Command{
 		fmt.Println("Checking credentials...")
 		fmt.Println("-----------------------")
 
-		_, err := platts.GetToken(un, pw, apikey, config.errorLog, config.infoLog)
+		tc := token.NewTokenClient(un, pw, apikey, config.errorLog, config.infoLog)
+		_, err := tc.GetToken()
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println("Please try again.")

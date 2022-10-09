@@ -22,7 +22,7 @@ var tradeCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize trade service
-		ts, err := trades.New(ctx, db.GetDB(), config.DBSelection)
+		ts, err := trades.New(ctx, db.GetDB(), config.dbSelection)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
