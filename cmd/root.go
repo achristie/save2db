@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/mitchellh/mapstructure"
@@ -62,6 +63,7 @@ func initConfig() {
 	if err := mapstructure.Decode(result, &config); err != nil {
 		fmt.Printf("decode config: %v", err)
 	}
+
 }
 
 type Database interface {
@@ -82,4 +84,6 @@ type Config struct {
 	DBPassword  string `mapstructure:"dbpassword"`
 	Path        string `mapstructure:"path"`
 	Fake        string `mapstructure:"fake"`
+	errorLog    *log.Logger
+	infoLog     *log.Logger
 }

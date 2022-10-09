@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/achristie/save2db/internal/services"
@@ -18,7 +17,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 
 	for result := range ch {
 		if result.Err != nil {
-			log.Printf("fetch: %s", result.Err)
+			config.errorLog.Printf("fetch: %s", result.Err)
 			m.p.Send(errCmd)
 			m.p.Quit()
 			return
@@ -35,7 +34,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 				_, err = svc.Add(ctx, m.tx, r)
 			}
 			if err != nil {
-				log.Printf("write: %s", err)
+				config.errorLog.Printf("write: %s", err)
 				m.p.Send(errCmd)
 				m.p.Quit()
 			}
@@ -48,7 +47,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 	err := m.tx.Commit()
 	if err != nil {
 		m.p.Send(errCmd)
-		log.Print(err)
+		config.errorLog.Print(err)
 		m.p.Quit()
 	}
 

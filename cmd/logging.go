@@ -12,6 +12,11 @@ func initLogging(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("error opening file: %v", err)
 	}
+
+	config.infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	config.errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	// defer f.Close()
-	log.SetOutput(f)
+	config.infoLog.SetOutput(f)
+	config.errorLog.SetOutput(f)
 }

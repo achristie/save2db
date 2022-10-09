@@ -22,6 +22,8 @@ var faCmd = &cobra.Command{
 	Long:  `Fetch assessments either by MDC (Market Data category) or Symbol(s) since t`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
+		// initialize client
+		main.client = platts.NewClient(config.APIKey, config.Username, config.Password, config.errorLog, config.infoLog)
 
 		// initialize assessments service
 		as, err := assessments.New(ctx, db.GetDB(), config.DBSelection)
@@ -81,7 +83,7 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 }
 
 func getWatchlist(ctx context.Context, name string) (platts.Watchlist, error) {
-	c := platts.NewClient(config.Fake, config.Username, config.Password)
+	c := platts.NewClient(config.Fake, config.Username, config.Password, config.errorLog, config.infoLog)
 	wl, err := c.GetWatchlistByName(name)
 	if err != nil {
 		return platts.Watchlist{}, nil

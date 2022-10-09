@@ -61,7 +61,7 @@ var fetchCmd = &cobra.Command{
 // setup db stuff
 func InitDB() error {
 	ctx := context.Background()
-	client := platts.NewClient(config.APIKey, config.Username, config.Password)
+	// client := platts.NewClient(config.APIKey, config.Username, config.Password)
 
 	switch config.DBSelection {
 	case "PostgreSQL":
@@ -82,7 +82,7 @@ func InitDB() error {
 		return fmt.Errorf("db tx: %w", err)
 	}
 
-	main = Main{client: client,
+	main = Main{
 		tx: tx,
 	}
 	return nil
