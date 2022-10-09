@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/achristie/save2db/pg"
+	"github.com/achristie/save2db/internal/pg"
+	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/sqlite"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

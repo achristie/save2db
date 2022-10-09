@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/achristie/save2db/internal/tui/progress"
 	"github.com/achristie/save2db/pkg/platts"
-	"github.com/achristie/save2db/pkg/tui/progress"
 	"github.com/achristie/save2db/services"
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/jackc/pgx/v5/stdlib"

@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/achristie/save2db/internal/sqlite"
 	"github.com/achristie/save2db/pkg/platts"
 	"github.com/achristie/save2db/services"
-	"github.com/achristie/save2db/sqlite"
 )
 
 func TestAssessmentsService_Add(t *testing.T) {

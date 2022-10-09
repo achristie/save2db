@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/achristie/save2db/pkg/tui/configure"
+	"github.com/achristie/save2db/internal/tui/configure"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
