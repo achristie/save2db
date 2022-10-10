@@ -42,11 +42,13 @@ func TestGetToken(t *testing.T) {
 			name:       "Invalid Credentials",
 			statusCode: http.StatusBadRequest,
 			wantErr:    token.ErrInvalidCred,
+			body:       RespInvalidCred,
 		},
 		{
 			name:       "Missing API Key",
 			statusCode: http.StatusUnauthorized,
 			wantErr:    token.ErrInvalidCred,
+			body:       RespMissingAPIKey,
 		},
 		{
 			name:       "Server Error",

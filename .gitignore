@@ -28,3 +28,8 @@
 
 # OSX nonsense
 *.DS_Store
+
+node_modules/
+
+.next
+dist/
