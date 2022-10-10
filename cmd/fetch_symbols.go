@@ -20,6 +20,9 @@ var symCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		// initialize client
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+
 		// initialize symbol service
 		ss, err := symService.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {

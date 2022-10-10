@@ -21,6 +21,9 @@ var tradeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		// initialize client
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+
 		// initialize trade service
 		ts, err := trades.New(ctx, db.GetDB(), config.DBSelection)
 		if err != nil {

@@ -42,7 +42,10 @@ func NewClient(apiKey string, username string, password string, errorLog, infoLo
 
 func (c *Client) newRequest(path string, query url.Values) (*http.Request, error) {
 	url := &c.baseURL
-	req, _ := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
+	req, err := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	tc := token.NewTokenClient(c.username, c.password, c.apiKey, c.errorLog, c.infoLog)
 	token, err := tc.GetToken()

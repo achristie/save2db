@@ -1,5 +1,5 @@
 CREATE TABLE
-  IF NOT EXISTS assessments (
+  assessments (
     symbol TEXT NOT NULL,
     bate TEXT NOT NULL,
     "value" REAL NOT NULL,
@@ -14,7 +14,7 @@ CREATE INDEX assessments_ad ON assessments (assessed_date);
 CREATE INDEX assessments_bate ON assessments (bate);
 
 CREATE TABLE
-  IF NOT EXISTS symbols (
+  symbols (
     symbol TEXT NOT NULL PRIMARY KEY,
     assessment_frequency TEXT,
     commodity TEXT,
@@ -39,8 +39,12 @@ CREATE TABLE
     bates json
   );
 
+CREATE INDEX plt_symbols_cmdty ON symbols (commodity);
+
+CREATE INDEX plt_symbols_drb ON symbols (delivery_region_basis);
+
 CREATE TABLE
-  IF NOT EXISTS trades (
+  trades (
     markets json,
     product TEXT,
     strip TEXT,
@@ -107,7 +111,13 @@ CREATE TABLE
     leg_prices TEXT,
     parent_deal_id TEXT,
     order_spread TEXT,
-    order_state_detail TEXT
+    order_state_detail TEXT,
+    PRIMARY KEY (
+      order_id,
+      order_sequence,
+      order_platts_id,
+      order_time
+    )
   );
 
 CREATE INDEX plt_trades_product_idx ON trades (product);

@@ -138,4 +138,4 @@ VALUES
     $65,
     $66,
     $67
-  );
+  ) ON CONFLICT (order_id, order_sequence, order_platts_id, order_time) IGNORE;

@@ -44,6 +44,7 @@ func New(ctx context.Context, db *sql.DB, dbSelection string) (*TradeService, er
 	}
 	return &ts, nil
 }
+
 func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, record interface{}) (sql.Result, error) {
 	r, ok := record.(platts.TradeResults)
 	if !ok {

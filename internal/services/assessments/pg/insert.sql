@@ -8,4 +8,5 @@ INSERT INTO
     is_corrected
   )
 VALUES
-  ($1, $2, $3, $4, $5, $6);
+  ($1, $2, $3, $4, $5, $6)
+  ON CONFLICT (symbol, bate, assessed_date) DO NOTHING;
