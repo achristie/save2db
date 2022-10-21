@@ -27,7 +27,7 @@ var faCmd = &cobra.Command{
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
 
 		// initialize assessments service
-		as, err := assessments.New(ctx, db.GetDB(), config.DBSelection)
+		as, err := assessments.New(ctx, db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)

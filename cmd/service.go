@@ -59,21 +59,10 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 }
 
 func getCompletionMsg(delete bool, count int) string {
-	var s string
-	if delete && config.DBSelection == "SQLite" {
-		if config.DBSelection == "SQLITE" {
-			s = fmt.Sprintf("removed [%d] records from [%s/%s]", count, config.DBSelection, config.Path)
-		} else {
-
-			s = fmt.Sprintf("removed [%d] records from [%s/%s]", count, config.DBSelection, config.DBName)
-		}
-	} else {
-		if config.DBSelection == "SQLite" {
-			s = fmt.Sprintf("added [%d] records to [%s/%s]", count, config.DBSelection, config.Path)
-		} else {
-
-			s = fmt.Sprintf("added [%d] records to [%s/%s]", count, config.DBSelection, config.DBName)
-		}
+	switch delete {
+	case true:
+		return fmt.Sprintf("removed [%d] records from [%s]", count, config.Database.Name)
+	default:
+		return fmt.Sprintf("added [%d] records to [%s]", count, config.Database.Name)
 	}
-	return s
 }

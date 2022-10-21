@@ -104,13 +104,11 @@ func InitToken(cfg Config) error {
 func InitDB(cfg Config) error {
 	ctx := context.Background()
 
-	switch config.DBSelection {
+	switch cfg.Database.Name {
 	case "PostgreSQL":
-		conn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", cfg.DBUsername, cfg.DBPassword,
-			cfg.DBHost, cfg.DBPort, cfg.DBName)
-		db = pg.NewDB(conn)
+		db = pg.NewDB(cfg.Database.DSN)
 	default:
-		db = sqlite.NewDB(cfg.Path)
+		db = sqlite.NewDB(cfg.Database.DSN)
 	}
 
 	if err := db.Open(); err != nil {

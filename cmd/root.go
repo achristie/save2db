@@ -49,8 +49,8 @@ func initConfig() {
 	}
 
 	// set defaults
-	viper.SetDefault("Path", "database.db")
-	viper.SetDefault("DBSelection", "SQLite")
+	viper.SetDefault("Database_Name", "SQLite")
+	viper.SetDefault("Database_DSN", "database.db")
 
 	var result map[string]interface{}
 	if err := viper.Unmarshal(&result); err != nil {
@@ -69,17 +69,16 @@ type Database interface {
 }
 
 type Config struct {
-	Username    string      `mapstructure:"username"`
-	Apikey      string      `mapstructure:"apikey"`
-	Password    string      `mapstructure:"password"`
-	DBHost      string      `mapstructure:"dbhost"`
-	DBPort      string      `mapstructure:"dbport"`
-	DBSelection string      `mapstructure:"dbselection"`
-	DBName      string      `mapstructure:"dbname"`
-	DBUsername  string      `mapstructure:"dbusername"`
-	DBPassword  string      `mapstructure:"dbpassword"`
-	Path        string      `mapstructure:"path"`
-	Fake        string      `mapstructure:"fake"`
-	errorLog    *log.Logger `mapstructure:"-"`
-	infoLog     *log.Logger `mapstructure:"-"`
+	Username string      `mapstructure:"username"`
+	Apikey   string      `mapstructure:"apikey"`
+	Password string      `mapstructure:"password"`
+	Fake     string      `mapstructure:"fake"`
+	errorLog *log.Logger `mapstructure:"-"`
+	infoLog  *log.Logger `mapstructure:"-"`
+	Database DB          `mapstructure:",squash"`
+}
+
+type DB struct {
+	Name string `mapstructure:"database_name"`
+	DSN  string `mapstructure:"database_dsn"`
 }

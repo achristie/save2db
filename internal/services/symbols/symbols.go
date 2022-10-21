@@ -45,6 +45,7 @@ func New(ctx context.Context, db *sql.DB, dbSelection string) (*SymbolService, e
 	}
 	return &ss, nil
 }
+
 func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
 	// convert bates to JSON
 	record := r.(platts.SymbolResults)

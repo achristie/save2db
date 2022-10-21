@@ -25,7 +25,7 @@ var tradeCmd = &cobra.Command{
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
 
 		// initialize trade service
-		ts, err := trades.New(ctx, db.GetDB(), config.DBSelection)
+		ts, err := trades.New(ctx, db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)

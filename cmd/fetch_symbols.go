@@ -24,7 +24,7 @@ var symCmd = &cobra.Command{
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
 
 		// initialize symbol service
-		ss, err := symService.New(ctx, db.GetDB(), config.DBSelection)
+		ss, err := symService.New(ctx, db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
