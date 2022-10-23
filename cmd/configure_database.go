@@ -68,6 +68,7 @@ func (m dbConfigModel) getDSN(name string) string {
 	case "SQLite":
 		fmt.Print("Enter SQLite Path: ")
 		m.scanner.Scan()
+
 		return m.scanner.Text()
 	case "PostgreSQL":
 		fmt.Print("Enter Host: ")
