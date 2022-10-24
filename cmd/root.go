@@ -1,18 +1,39 @@
 package cmd
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/achristie/save2db/pkg/platts"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var config Config
+
+type Config struct {
+	Username string `mapstructure:"username"`
+	Apikey   string `mapstructure:"apikey"`
+	Password string `mapstructure:"password"`
+	Fake     string `mapstructure:"fake"`
+	Database DB     `mapstructure:",squash"`
+}
+
+type DB struct {
+	Name string `mapstructure:"database_name"`
+	DSN  string `mapstructure:"database_dsn"`
+}
+
+type application struct {
+	client *platts.Client
+	tx     *sql.Tx
+	p      *tea.Program
+	logger *log.Logger
+}
 
 var rootCmd = &cobra.Command{
 	Use:              "platts-cli",
@@ -60,25 +81,4 @@ func initConfig() {
 	if err := mapstructure.Decode(result, &config); err != nil {
 		fmt.Printf("decode config: %v", err)
 	}
-}
-
-type Database interface {
-	Open() error
-	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
-	GetDB() *sql.DB
-}
-
-type Config struct {
-	Username string      `mapstructure:"username"`
-	Apikey   string      `mapstructure:"apikey"`
-	Password string      `mapstructure:"password"`
-	Fake     string      `mapstructure:"fake"`
-	errorLog *log.Logger `mapstructure:"-"`
-	infoLog  *log.Logger `mapstructure:"-"`
-	Database DB          `mapstructure:",squash"`
-}
-
-type DB struct {
-	Name string `mapstructure:"database_name"`
-	DSN  string `mapstructure:"database_dsn"`
 }

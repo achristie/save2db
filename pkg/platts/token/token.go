@@ -3,8 +3,6 @@ package token
 import (
 	"encoding/json"
 	"errors"
-	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -35,18 +33,14 @@ type TokenClient struct {
 	username      string
 	password      string
 	apikey        string
-	errorLog      *log.Logger
-	infoLog       *log.Logger
 }
 
-func NewTokenClient(username, password, apikey string, errorLog, infoLog *log.Logger) *TokenClient {
+func NewTokenClient(username, password, apikey string) *TokenClient {
 	return &TokenClient{
 		TokenEndpoint: tokenEndpoint,
 		username:      username,
 		password:      password,
 		apikey:        apikey,
-		infoLog:       infoLog,
-		errorLog:      errorLog,
 	}
 }
 
@@ -73,8 +67,6 @@ func (tc *TokenClient) GetToken() (*Token, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(res.Body)
-		tc.errorLog.Printf("[%d] %s", res.StatusCode, body)
 		switch s := res.StatusCode; s {
 		case http.StatusForbidden, http.StatusUnauthorized, http.StatusBadRequest:
 			return nil, ErrInvalidCred

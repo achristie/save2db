@@ -24,7 +24,7 @@ var faCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize client
-		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize assessments service
 		as, err := assessments.New(ctx, db.GetDB(), config.Database.Name)
@@ -75,7 +75,7 @@ func init() {
 	fetchCmd.AddCommand(faCmd)
 }
 
-func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
+func (m *application) getAssessments(ctx context.Context, mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
 	if len(symbols) > 0 {
 		m.client.GetHistoryBySymbol(symbols, start, 10000, ch)
 	} else {
@@ -84,7 +84,7 @@ func (m *Main) getAssessments(ctx context.Context, mdc string, symbols []string,
 }
 
 func getWatchlist(ctx context.Context, name string) (*platts.Watchlist, error) {
-	c := platts.NewClient(config.Fake, config.Username, config.Password, config.errorLog, config.infoLog)
+	c := platts.NewClient(config.Fake, config.Username, config.Password)
 	wl, err := c.GetWatchlistByName(name)
 	if err != nil {
 		return nil, err

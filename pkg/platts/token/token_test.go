@@ -3,8 +3,6 @@ package token_test
 import (
 	_ "embed"
 	"encoding/json"
-	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -75,7 +73,7 @@ func TestGetToken(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			tc := token.NewTokenClient("test", "test", "test", log.New(io.Discard, "", 0), log.New(io.Discard, "", 0))
+			tc := token.NewTokenClient("test", "test", "test")
 			tc.TokenEndpoint = ts.URL
 
 			res, err := tc.GetToken()

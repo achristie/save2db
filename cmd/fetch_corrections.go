@@ -23,7 +23,7 @@ var fcCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize client
-		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// setup TUI
 		filters := make(map[string]string)
@@ -52,6 +52,6 @@ func init() {
 	fetchCmd.AddCommand(fcCmd)
 }
 
-func (m *Main) getCorrections(ctx context.Context, start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
+func (m *application) getCorrections(ctx context.Context, start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
 	m.client.GetDeletes(start, 10000, ch)
 }

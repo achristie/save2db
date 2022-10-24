@@ -10,14 +10,14 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts.Result[T], svc services.Service, delete bool) {
+func writeToSvc[T platts.Writeable](ctx context.Context, m *application, ch chan platts.Result[T], svc services.Service, delete bool) {
 	count := 0
 	errCmd := progress.StatusCmd("ERROR: Please try again.")()
 	m.p.Send(progress.StatusCmd("IN PROGRESS")())
 
 	for result := range ch {
 		if result.Err != nil {
-			config.errorLog.Printf("fetch: %s", result.Err)
+			// config.errorLog.Printf("fetch: %s", result.Err)
 			m.p.Send(errCmd)
 			m.p.Quit()
 			return
@@ -34,7 +34,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 				_, err = svc.Add(ctx, m.tx, r)
 			}
 			if err != nil {
-				config.errorLog.Printf("write: %s", err)
+				// config.errorLog.Printf("write: %s", err)
 				m.p.Send(errCmd)
 				m.p.Quit()
 			}
@@ -47,7 +47,7 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *Main, ch chan platts
 	err := m.tx.Commit()
 	if err != nil {
 		m.p.Send(errCmd)
-		config.errorLog.Print(err)
+		// config.errorLog.Print(err)
 		m.p.Quit()
 	}
 

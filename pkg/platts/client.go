@@ -28,15 +28,13 @@ type Client struct {
 	infoLog  *log.Logger
 }
 
-func NewClient(apiKey string, username string, password string, errorLog, infoLog *log.Logger) *Client {
+func NewClient(apiKey string, username string, password string) *Client {
 	return &Client{
 		apiKey:   apiKey,
 		baseURL:  baseURL,
 		c:        &http.Client{Timeout: time.Minute},
 		username: username,
 		password: password,
-		errorLog: errorLog,
-		infoLog:  infoLog,
 	}
 }
 
@@ -47,7 +45,7 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 		return nil, err
 	}
 
-	tc := token.NewTokenClient(c.username, c.password, c.apiKey, c.errorLog, c.infoLog)
+	tc := token.NewTokenClient(c.username, c.password, c.apiKey)
 	token, err := tc.GetToken()
 	if err != nil {
 		return nil, err
@@ -68,11 +66,11 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	defer res.Body.Close()
 
 	u, _ := url.QueryUnescape(req.URL.String())
-	c.infoLog.Printf("platts: [%d] %s", res.StatusCode, u)
+	// c.infoLog.Printf("platts: [%d] %s", res.StatusCode, u)
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		c.errorLog.Printf("platts: [%d] %s", res.StatusCode, body)
+		// c.errorLog.Printf("platts: [%d] %s", res.StatusCode, body)
 		return nil, fmt.Errorf("platts: [%s] %s %s\n %s", req.Method, res.Status, u, body)
 	}
 

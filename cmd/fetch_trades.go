@@ -22,7 +22,7 @@ var tradeCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize client
-		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize trade service
 		ts, err := trades.New(ctx, db.GetDB(), config.Database.Name)
@@ -55,6 +55,6 @@ func init() {
 	fetchCmd.AddCommand(tradeCmd)
 }
 
-func (m *Main) getTrades(ctx context.Context, markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
+func (m *application) getTrades(ctx context.Context, markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
 	m.client.GetTradeData(markets, start, 1000, ch)
 }

@@ -40,7 +40,7 @@ var configureCmd = &cobra.Command{
 		fmt.Println("Checking credentials...")
 		fmt.Println("-----------------------")
 
-		tc := token.NewTokenClient(un, pw, apikey, config.errorLog, config.infoLog)
+		tc := token.NewTokenClient(un, pw, apikey)
 		_, err := tc.GetToken()
 		if err != nil {
 			fmt.Println(err)

@@ -1,28 +1,16 @@
 package cmd
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/achristie/save2db/internal/pg"
-	"github.com/achristie/save2db/internal/sqlite"
-	"github.com/achristie/save2db/pkg/platts"
 	"github.com/achristie/save2db/pkg/platts/token"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type Main struct {
-	client *platts.Client
-	tx     *sql.Tx
-	p      *tea.Program
-}
-
 var (
-	main      Main
+	main      application
 	db        Database
 	start     string
 	startDate time.Time
@@ -51,7 +39,8 @@ var fetchCmd = &cobra.Command{
 			return err
 		}
 
-		return InitDB(config)
+		return nil
+		// return InitDB(config)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("dataset not available, %s", args)
@@ -91,38 +80,11 @@ func ParseDate(start string) (time.Time, error) {
 }
 
 func InitToken(cfg Config) error {
-	tc := token.NewTokenClient(cfg.Username, cfg.Password, cfg.Apikey, cfg.errorLog, cfg.infoLog)
+	tc := token.NewTokenClient(cfg.Username, cfg.Password, cfg.Apikey)
 	_, err := tc.GetToken()
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// setup db
-func InitDB(cfg Config) error {
-	ctx := context.Background()
-
-	switch cfg.Database.Name {
-	case "PostgreSQL":
-		db = pg.NewDB(cfg.Database.DSN)
-	default:
-		db = sqlite.NewDB(cfg.Database.DSN)
-	}
-
-	if err := db.Open(); err != nil {
-		return fmt.Errorf("db open: %w", err)
-	}
-
-	// begin a transaction
-	tx, err := db.BeginTx(ctx, nil)
-	if err != nil {
-		return fmt.Errorf("db tx: %w", err)
-	}
-
-	main = Main{
-		tx: tx,
-	}
 	return nil
 }

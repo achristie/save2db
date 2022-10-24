@@ -21,7 +21,7 @@ var symCmd = &cobra.Command{
 		ctx := context.Background()
 
 		// initialize client
-		main.client = platts.NewClient(config.Apikey, config.Username, config.Password, config.errorLog, config.infoLog)
+		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize symbol service
 		ss, err := symService.New(ctx, db.GetDB(), config.Database.Name)
@@ -53,6 +53,6 @@ var symCmd = &cobra.Command{
 func init() {
 	fetchCmd.AddCommand(symCmd)
 }
-func (m *Main) getSymbols(ctx context.Context, mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
+func (m *application) getSymbols(ctx context.Context, mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
 	m.client.GetReferenceData(start, 1000, mdc, ch)
 }
