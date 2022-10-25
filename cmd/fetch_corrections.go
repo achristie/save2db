@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
@@ -20,8 +19,6 @@ var fcCmd = &cobra.Command{
 	Short: "Fetch deleted assessment data",
 	Long:  `Fetch corrections (deletes) since t`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
 		// initialize client
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
@@ -31,7 +28,7 @@ var fcCmd = &cobra.Command{
 		main.p = tea.NewProgram(progress.New("FETCH CORRECTIONS", filters))
 
 		// initialize assessments service
-		as, err := assessments.New(ctx, db.GetDB(), config.Database.Name)
+		as, err := assessments.New(db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)
@@ -41,8 +38,8 @@ var fcCmd = &cobra.Command{
 		ch := make(chan platts.Result[platts.SymbolCorrection])
 
 		go func() {
-			main.getCorrections(ctx, startDate, ch)
-			writeToSvc(ctx, &main, ch, as, true)
+			main.getCorrections(startDate, ch)
+			writeToSvc(&main, ch, as, true)
 		}()
 		main.p.Start()
 	},
@@ -52,6 +49,6 @@ func init() {
 	fetchCmd.AddCommand(fcCmd)
 }
 
-func (m *application) getCorrections(ctx context.Context, start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
+func (m *application) getCorrections(start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
 	m.client.GetDeletes(start, 10000, ch)
 }

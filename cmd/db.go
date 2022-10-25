@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 
@@ -11,13 +10,11 @@ import (
 
 type Database interface {
 	Open() error
-	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+	BeginTx(*sql.TxOptions) (*sql.Tx, error)
 	GetDB() *sql.DB
 }
 
 func (app *application) GetTx(cfg Config) (*sql.Tx, error) {
-	ctx := context.Background()
-
 	switch cfg.Database.Name {
 	case "PostgreSQL":
 		db = pg.NewDB(cfg.Database.DSN)
@@ -30,7 +27,7 @@ func (app *application) GetTx(cfg Config) (*sql.Tx, error) {
 	}
 
 	// begin a transaction
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := db.BeginTx(nil)
 	if err != nil {
 		return nil, fmt.Errorf("db tx: %w", err)
 	}

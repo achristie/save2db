@@ -1,7 +1,6 @@
 package assessments_test
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -18,14 +17,12 @@ func TestAssessmentsService_Add(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ctx := context.Background()
-
-		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -33,7 +30,7 @@ func TestAssessmentsService_Add(t *testing.T) {
 		r := platts.Assessment{Symbol: "A", Bate: "B", AssessDate: "2022-01-01T00:00:00", ModDate: "2021-01-01T00:00:00", IsCorrected: "N", Value: 100}
 
 		expected := 1
-		res, err := as.Add(ctx, tx, r)
+		res, err := as.Add(tx, r)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -56,20 +53,19 @@ func TestAssessmentsService_Add(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ctx := context.Background()
-		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer tx.Rollback()
 		for i := 0; i < 1000; i++ {
 			r := platts.Assessment{Symbol: fmt.Sprint(i), Bate: "B", AssessDate: "2022-01-01T00:00:00", ModDate: "2021-01-01T00:00:00", IsCorrected: "N", Value: 100}
-			_, err := as.Add(ctx, tx, r)
+			_, err := as.Add(tx, r)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -84,14 +80,12 @@ func TestAssessmentsService_Remove(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ctx := context.Background()
-
-		as, err := assessments.New(ctx, db.GetDB(), "SQLite")
+		as, err := assessments.New(db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -99,7 +93,7 @@ func TestAssessmentsService_Remove(t *testing.T) {
 		r := platts.Assessment{Symbol: "A", Bate: "B", AssessDate: "2022-01-01T00:00:00", ModDate: "2021-01-01T00:00:00", IsCorrected: "N", Value: 100}
 
 		expected := 1
-		res, err := as.Add(ctx, tx, r)
+		res, err := as.Add(tx, r)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -113,12 +107,12 @@ func TestAssessmentsService_Remove(t *testing.T) {
 		}
 		tx.Commit()
 
-		tx, err = db.BeginTx(ctx, nil)
+		tx, err = db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		res, err = as.Remove(ctx, tx, r)
+		res, err = as.Remove(tx, r)
 		fmt.Print(res.RowsAffected())
 
 	})

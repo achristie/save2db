@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-func writeToSvc[T platts.Writeable](ctx context.Context, m *application, ch chan platts.Result[T], svc services.Service, delete bool) {
+func writeToSvc[T platts.Writeable](m *application, ch chan platts.Result[T], svc services.Service, delete bool) {
 	count := 0
 	errCmd := progress.StatusCmd("ERROR: Please try again.")()
 	m.p.Send(progress.StatusCmd("IN PROGRESS")())
@@ -29,9 +28,9 @@ func writeToSvc[T platts.Writeable](ctx context.Context, m *application, ch chan
 		for _, r := range res.GetResults() {
 			var err error
 			if delete {
-				_, err = svc.Remove(ctx, m.tx, r)
+				_, err = svc.Remove(m.tx, r)
 			} else {
-				_, err = svc.Add(ctx, m.tx, r)
+				_, err = svc.Add(m.tx, r)
 			}
 			if err != nil {
 				// config.errorLog.Printf("write: %s", err)

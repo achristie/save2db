@@ -1,7 +1,6 @@
 package trades_test
 
 import (
-	"context"
 	"path/filepath"
 	"testing"
 
@@ -17,14 +16,12 @@ func TestTradeSericeAdd(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ctx := context.Background()
-
-		ts, err := trades.New(ctx, db.GetDB(), "SQLite")
+		ts, err := trades.New(db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -32,7 +29,7 @@ func TestTradeSericeAdd(t *testing.T) {
 		r := platts.TradeResults{Market: []string{"EU BFOE", "Other"}, DealID: 100}
 
 		expected := 1
-		res, err := ts.Add(ctx, tx, r)
+		res, err := ts.Add(tx, r)
 		if err != nil {
 			t.Fatal(err)
 		}

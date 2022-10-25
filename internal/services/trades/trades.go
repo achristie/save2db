@@ -32,9 +32,9 @@ func getTradeStmts(s string) string {
 
 }
 
-func New(ctx context.Context, db *sql.DB, dbSelection string) (*TradeService, error) {
+func New(db *sql.DB, dbSelection string) (*TradeService, error) {
 	ins := getTradeStmts(dbSelection)
-	insert, err := db.PrepareContext(ctx, ins)
+	insert, err := db.PrepareContext(context.TODO(), ins)
 	if err != nil {
 		return nil, fmt.Errorf("insert statement: %w", err)
 	}
@@ -45,7 +45,7 @@ func New(ctx context.Context, db *sql.DB, dbSelection string) (*TradeService, er
 	return &ts, nil
 }
 
-func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, record interface{}) (sql.Result, error) {
+func (s *TradeService) Add(tx *sql.Tx, record interface{}) (sql.Result, error) {
 	r, ok := record.(platts.TradeResults)
 	if !ok {
 		return nil, fmt.Errorf("add: must be a platts.TradeResult")
@@ -74,6 +74,6 @@ func (s *TradeService) Add(ctx context.Context, tx *sql.Tx, record interface{}) 
 
 }
 
-func (s *TradeService) Remove(ctx context.Context, tx *sql.Tx, record interface{}) (sql.Result, error) {
+func (s *TradeService) Remove(tx *sql.Tx, record interface{}) (sql.Result, error) {
 	panic("Not implemented")
 }

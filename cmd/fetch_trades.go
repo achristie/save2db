@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -19,13 +18,11 @@ var tradeCmd = &cobra.Command{
 	Use:   "trades",
 	Short: "Fetch trade data (eWindow Market Data)",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
 		// initialize client
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize trade service
-		ts, err := trades.New(ctx, db.GetDB(), config.Database.Name)
+		ts, err := trades.New(db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
@@ -42,8 +39,8 @@ var tradeCmd = &cobra.Command{
 
 		// fetch and store
 		go func() {
-			main.getTrades(ctx, markets, startDate, ch)
-			writeToSvc(ctx, &main, ch, ts, false)
+			main.getTrades(markets, startDate, ch)
+			writeToSvc(&main, ch, ts, false)
 		}()
 
 		// start TUI
@@ -55,6 +52,6 @@ func init() {
 	fetchCmd.AddCommand(tradeCmd)
 }
 
-func (m *application) getTrades(ctx context.Context, markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
+func (m *application) getTrades(markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
 	m.client.GetTradeData(markets, start, 1000, ch)
 }

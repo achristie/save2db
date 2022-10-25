@@ -33,9 +33,9 @@ func getSymbolStmts(s string) string {
 
 }
 
-func New(ctx context.Context, db *sql.DB, dbSelection string) (*SymbolService, error) {
+func New(db *sql.DB, dbSelection string) (*SymbolService, error) {
 	ins := getSymbolStmts(dbSelection)
-	insert, err := db.PrepareContext(ctx, ins)
+	insert, err := db.PrepareContext(context.TODO(), ins)
 	if err != nil {
 		return nil, fmt.Errorf("insert statement: %w", err)
 	}
@@ -46,7 +46,7 @@ func New(ctx context.Context, db *sql.DB, dbSelection string) (*SymbolService, e
 	return &ss, nil
 }
 
-func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+func (s *SymbolService) Add(tx *sql.Tx, r interface{}) (sql.Result, error) {
 	// convert bates to JSON
 	record := r.(platts.SymbolResults)
 	bates, err := json.Marshal(&record.Bate)
@@ -75,6 +75,6 @@ func (s *SymbolService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql
 	return res, nil
 }
 
-func (s *SymbolService) Remove(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+func (s *SymbolService) Remove(tx *sql.Tx, r interface{}) (sql.Result, error) {
 	panic("not implemented")
 }

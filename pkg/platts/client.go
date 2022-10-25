@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -24,8 +23,6 @@ type Client struct {
 	username string
 	password string
 	c        *http.Client
-	errorLog *log.Logger
-	infoLog  *log.Logger
 }
 
 func NewClient(apiKey string, username string, password string) *Client {

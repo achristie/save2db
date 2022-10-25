@@ -14,8 +14,6 @@ var migrationFS embed.FS
 
 type DB struct {
 	db     *sql.DB
-	ctx    context.Context
-	cancel func()
 	source string
 }
 
@@ -25,7 +23,6 @@ func (db *DB) GetDB() *sql.DB {
 
 func NewDB(source string) *DB {
 	db := &DB{source: source}
-	db.ctx, db.cancel = context.WithCancel(context.Background())
 	return db
 }
 
@@ -91,8 +88,8 @@ func (db *DB) migrateFile(name string) error {
 	return tx.Commit()
 }
 
-func (db *DB) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
-	tx, err := db.db.BeginTx(ctx, opts)
+func (db *DB) BeginTx(opts *sql.TxOptions) (*sql.Tx, error) {
+	tx, err := db.db.BeginTx(context.TODO(), opts)
 	if err != nil {
 		return nil, err
 	}

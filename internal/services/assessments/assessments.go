@@ -39,14 +39,14 @@ func getPreparedStmts(s string) (string, string) {
 	}
 }
 
-func New(ctx context.Context, db *sql.DB, dbSelection string) (*AssessmentsService, error) {
+func New(db *sql.DB, dbSelection string) (*AssessmentsService, error) {
 	ins, del := getPreparedStmts(dbSelection)
-	insert, err := db.PrepareContext(ctx, ins)
+	insert, err := db.PrepareContext(context.TODO(), ins)
 	if err != nil {
 		return nil, fmt.Errorf("insert statement: %w", err)
 	}
 
-	delete, err := db.PrepareContext(ctx, del)
+	delete, err := db.PrepareContext(context.TODO(), del)
 	if err != nil {
 		return nil, fmt.Errorf("delete statement: %w", err)
 	}
@@ -57,27 +57,27 @@ func New(ctx context.Context, db *sql.DB, dbSelection string) (*AssessmentsServi
 	return &as, nil
 }
 
-func (s *AssessmentsService) Remove(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+func (s *AssessmentsService) Remove(tx *sql.Tx, r interface{}) (sql.Result, error) {
 	record, ok := r.(platts.Assessment)
 	if !ok {
 		return nil, fmt.Errorf("remove: must use a platts.assessment")
 	}
 	log.Printf("%+v", record)
 
-	res, err := tx.StmtContext(ctx, s.delete).Exec(record.Symbol, record.Bate, record.AssessDate)
+	res, err := tx.StmtContext(context.TODO(), s.delete).Exec(record.Symbol, record.Bate, record.AssessDate)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (s *AssessmentsService) Add(ctx context.Context, tx *sql.Tx, r interface{}) (sql.Result, error) {
+func (s *AssessmentsService) Add(tx *sql.Tx, r interface{}) (sql.Result, error) {
 	record, ok := r.(platts.Assessment)
 	if !ok {
 		return nil, fmt.Errorf("remove: must use a platts.assessment")
 	}
 
-	res, err := tx.StmtContext(ctx, s.insert).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
+	res, err := tx.StmtContext(context.TODO(), s.insert).Exec(record.Symbol, record.Bate, record.Value, record.AssessDate, record.ModDate, record.IsCorrected)
 	if err != nil {
 		return nil, err
 	}

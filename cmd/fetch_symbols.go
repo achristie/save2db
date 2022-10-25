@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"time"
@@ -18,13 +17,11 @@ var symCmd = &cobra.Command{
 	Use:   "symbols",
 	Short: "Fetch symbol reference data",
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-
 		// initialize client
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize symbol service
-		ss, err := symService.New(ctx, db.GetDB(), config.Database.Name)
+		ss, err := symService.New(db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
@@ -41,8 +38,8 @@ var symCmd = &cobra.Command{
 
 		// fetch and store
 		go func() {
-			main.getSymbols(ctx, mdc, startDate, ch)
-			writeToSvc(ctx, &main, ch, ss, false)
+			main.getSymbols(mdc, startDate, ch)
+			writeToSvc(&main, ch, ss, false)
 		}()
 
 		// start TUI
@@ -53,6 +50,6 @@ var symCmd = &cobra.Command{
 func init() {
 	fetchCmd.AddCommand(symCmd)
 }
-func (m *application) getSymbols(ctx context.Context, mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
+func (m *application) getSymbols(mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
 	m.client.GetReferenceData(start, 1000, mdc, ch)
 }

@@ -1,7 +1,6 @@
 package symbols_test
 
 import (
-	"context"
 	"path/filepath"
 	"testing"
 
@@ -17,14 +16,12 @@ func TestSymbolServiceAdd(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		ctx := context.Background()
-
-		as, err := symbols.New(ctx, db.GetDB(), "SQLite")
+		as, err := symbols.New(db.GetDB(), "SQLite")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -32,7 +29,7 @@ func TestSymbolServiceAdd(t *testing.T) {
 		r := platts.SymbolResults{Symbol: "ABC", SettlementType: "Physical"}
 
 		expected := 1
-		res, err := as.Add(ctx, tx, r)
+		res, err := as.Add(tx, r)
 		if err != nil {
 			t.Fatal(err)
 		}

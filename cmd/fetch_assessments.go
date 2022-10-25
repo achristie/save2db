@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -21,13 +20,12 @@ var faCmd = &cobra.Command{
 	Short: "Fetch assessment data",
 	Long:  `Fetch assessments either by MDC (Market Data category) or Symbol(s) since t`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
 
 		// initialize client
 		main.client = platts.NewClient(config.Apikey, config.Username, config.Password)
 
 		// initialize assessments service
-		as, err := assessments.New(ctx, db.GetDB(), config.Database.Name)
+		as, err := assessments.New(db.GetDB(), config.Database.Name)
 		if err != nil {
 			fmt.Printf("assessments svc: %s", err)
 			os.Exit(1)
@@ -38,7 +36,7 @@ var faCmd = &cobra.Command{
 
 		// use watchlist if set
 		if watchlist != "" {
-			wl, err := getWatchlist(ctx, watchlist)
+			wl, err := getWatchlist(watchlist)
 			if err != nil {
 				fmt.Printf("get watchlist: %v\n", err)
 				os.Exit(1)
@@ -62,8 +60,8 @@ var faCmd = &cobra.Command{
 
 		// fetch and store
 		go func() {
-			main.getAssessments(ctx, mdc, symbols, startDate, ch)
-			writeToSvc(ctx, &main, ch, as, false)
+			main.getAssessments(mdc, symbols, startDate, ch)
+			writeToSvc(&main, ch, as, false)
 		}()
 
 		// start TUI
@@ -75,7 +73,7 @@ func init() {
 	fetchCmd.AddCommand(faCmd)
 }
 
-func (m *application) getAssessments(ctx context.Context, mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
+func (m *application) getAssessments(mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
 	if len(symbols) > 0 {
 		m.client.GetHistoryBySymbol(symbols, start, 10000, ch)
 	} else {
@@ -83,7 +81,7 @@ func (m *application) getAssessments(ctx context.Context, mdc string, symbols []
 	}
 }
 
-func getWatchlist(ctx context.Context, name string) (*platts.Watchlist, error) {
+func getWatchlist(name string) (*platts.Watchlist, error) {
 	c := platts.NewClient(config.Fake, config.Username, config.Password)
 	wl, err := c.GetWatchlistByName(name)
 	if err != nil {
