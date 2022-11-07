@@ -52,6 +52,6 @@ func init() {
 	fetchCmd.AddCommand(tradeCmd)
 }
 
-func (m *application) getTrades(markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
+func (m *Application) getTrades(markets []string, start time.Time, ch chan platts.Result[platts.TradeData]) {
 	m.client.GetTradeData(markets, start, 1000, ch)
 }

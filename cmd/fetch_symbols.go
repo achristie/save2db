@@ -50,6 +50,6 @@ var symCmd = &cobra.Command{
 func init() {
 	fetchCmd.AddCommand(symCmd)
 }
-func (m *application) getSymbols(mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
+func (m *Application) getSymbols(mdc string, start time.Time, ch chan platts.Result[platts.SymbolData]) {
 	m.client.GetReferenceData(start, 1000, mdc, ch)
 }

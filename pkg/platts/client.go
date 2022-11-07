@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/achristie/save2db/pkg/platts/token"
+	"github.com/achristie/save2db/internal/token"
 )
 
 const (

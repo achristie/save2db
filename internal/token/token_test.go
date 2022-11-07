@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/achristie/save2db/internal/assert"
-	"github.com/achristie/save2db/pkg/platts/token"
+	"github.com/achristie/save2db/internal/token"
 )
 
 var (

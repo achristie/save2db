@@ -28,7 +28,7 @@ type DB struct {
 	DSN  string `mapstructure:"database_dsn"`
 }
 
-type application struct {
+type Application struct {
 	client *platts.Client
 	tx     *sql.Tx
 	p      *tea.Program

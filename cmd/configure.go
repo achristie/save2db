@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/achristie/save2db/pkg/platts/token"
+	"github.com/achristie/save2db/internal/token"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

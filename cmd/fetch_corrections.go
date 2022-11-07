@@ -49,6 +49,6 @@ func init() {
 	fetchCmd.AddCommand(fcCmd)
 }
 
-func (m *application) getCorrections(start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
+func (m *Application) getCorrections(start time.Time, ch chan platts.Result[platts.SymbolCorrection]) {
 	m.client.GetDeletes(start, 10000, ch)
 }

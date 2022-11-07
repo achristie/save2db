@@ -48,6 +48,7 @@ func (tc *TokenClient) GetToken() (*Token, error) {
 	if time.Now().Before(cache.Iat.Add(50 * time.Minute)) {
 		return &cache, nil
 	}
+
 	data := url.Values{}
 	data.Set("username", tc.username)
 	data.Set("password", tc.password)
@@ -77,11 +78,12 @@ func (tc *TokenClient) GetToken() (*Token, error) {
 		}
 	}
 
-	j := json.NewDecoder(res.Body)
 	var token Token
+	j := json.NewDecoder(res.Body)
 	if err = j.Decode(&token); err != nil {
 		return nil, err
 	}
+
 	token.Iat = time.Now()
 	cache = token
 

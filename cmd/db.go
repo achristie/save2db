@@ -14,7 +14,7 @@ type Database interface {
 	GetDB() *sql.DB
 }
 
-func (app *application) GetTx(cfg Config) (*sql.Tx, error) {
+func (app *Application) GetTx(cfg Config) (*sql.Tx, error) {
 	switch cfg.Database.Name {
 	case "PostgreSQL":
 		db = pg.NewDB(cfg.Database.DSN)

@@ -9,7 +9,7 @@ import (
 	"github.com/achristie/save2db/pkg/platts"
 )
 
-func writeToSvc[T platts.Writeable](m *application, ch chan platts.Result[T], svc services.Service, delete bool) {
+func writeToSvc[T platts.Writeable](m *Application, ch chan platts.Result[T], svc services.Service, delete bool) {
 	count := 0
 	errCmd := progress.StatusCmd("ERROR: Please try again.")()
 	m.p.Send(progress.StatusCmd("IN PROGRESS")())

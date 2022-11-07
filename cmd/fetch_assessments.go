@@ -73,7 +73,7 @@ func init() {
 	fetchCmd.AddCommand(faCmd)
 }
 
-func (m *application) getAssessments(mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
+func (m *Application) getAssessments(mdc string, symbols []string, start time.Time, ch chan platts.Result[platts.SymbolHistory]) {
 	if len(symbols) > 0 {
 		m.client.GetHistoryBySymbol(symbols, start, 10000, ch)
 	} else {

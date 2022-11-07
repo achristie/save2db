@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/achristie/save2db/pkg/platts/token"
+	"github.com/achristie/save2db/internal/token"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	main      application
+	main      Application
 	db        Database
 	start     string
 	startDate time.Time
