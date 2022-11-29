@@ -11,7 +11,7 @@ type Writeable interface {
 	GetTotalPages() int
 }
 
-type Result[T Concurrentable] struct {
+type Result[T any] struct {
 	Message *T
-	Err     error
+	Error   error
 }

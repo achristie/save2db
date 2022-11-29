@@ -18,7 +18,7 @@ const (
 )
 
 type Client struct {
-	baseURL  string
+	BaseURL  string
 	apiKey   string
 	username string
 	password string
@@ -28,7 +28,7 @@ type Client struct {
 func NewClient(apiKey string, username string, password string) *Client {
 	return &Client{
 		apiKey:   apiKey,
-		baseURL:  baseURL,
+		BaseURL:  baseURL,
 		c:        &http.Client{Timeout: time.Minute},
 		username: username,
 		password: password,
@@ -36,7 +36,7 @@ func NewClient(apiKey string, username string, password string) *Client {
 }
 
 func (c *Client) newRequest(path string, query url.Values) (*http.Request, error) {
-	url := &c.baseURL
+	url := &c.BaseURL
 	req, err := http.NewRequest(http.MethodGet, *url+path+"?"+query.Encode(), nil)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,6 @@ func (c *Client) newRequest(path string, query url.Values) (*http.Request, error
 }
 
 func (c *Client) do(req *http.Request, target interface{}) (*http.Response, error) {
-	// req.Close = true
 	res, err := c.c.Do(req)
 	if err != nil {
 		return nil, err
@@ -63,12 +62,10 @@ func (c *Client) do(req *http.Request, target interface{}) (*http.Response, erro
 	defer res.Body.Close()
 
 	u, _ := url.QueryUnescape(req.URL.String())
-	// c.infoLog.Printf("platts: [%d] %s", res.StatusCode, u)
 
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(res.Body)
-		// c.errorLog.Printf("platts: [%d] %s", res.StatusCode, body)
-		return nil, fmt.Errorf("platts: [%s] %s %s\n %s", req.Method, res.Status, u, body)
+		return nil, fmt.Errorf("platts: [%s] %s %s\n%s", req.Method, res.Status, u, body)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(target)
